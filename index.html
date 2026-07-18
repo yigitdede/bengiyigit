@@ -27,10 +27,16 @@
         <span class="header__logo-text">İkimizin Hikayesi</span>
       </a>
       <div class="header__actions">
-        <button id="musicToggleBtn" class="header__music-btn" aria-label="Müzik Aç/Kapat" title="Sanki fonda tatlı bir melodi çalıyor...">
-          <span class="header__music-icon">🎵</span>
-          <span class="header__music-label">Melodi</span>
-        </button>
+        <div class="header__music-player">
+          <span id="musicTrackInfo" class="header__music-info"></span>
+          <button id="musicToggleBtn" class="header__music-btn" aria-label="Müzik Aç/Kapat" title="Müziği Oynat/Duraklat">
+            <span class="header__music-icon">🎵</span>
+            <span class="header__music-label">Melodi</span>
+          </button>
+          <button id="musicNextBtn" class="header__music-btn header__music-btn--next" aria-label="Sonraki Şarkı" title="Sonraki Şarkı" style="display: none;">
+            <span class="header__music-icon">⏭️</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -168,6 +174,88 @@
               <span class="gallery-card__date">Anı #6</span>
               <h3 class="gallery-card__title">Gülüşüne Aşık Olduğum An</h3>
               <p class="gallery-card__desc">Yüzündeki tek bir tebessüm bile günümü aydınlatmaya yetiyor.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Panel Section -->
+    <section id="interactive-panel" class="interactive-section">
+      <div class="interactive__container">
+        <div class="section-header">
+          <span class="section-header__tag">✨ Sen ve Ben</span>
+          <h2 class="section-header__title">İnteraktif Aşk Paneli</h2>
+          <p class="section-header__subtitle">Birlikte yeni planlar yapın veya tatlı sitemlerinizi paylaşın.</p>
+        </div>
+
+        <div class="interactive__grid">
+          <!-- Card 1: Date Proposal -->
+          <article class="interactive-card glass-card">
+            <div class="interactive-card__header">
+              <span class="interactive-card__icon">📅</span>
+              <h3 class="interactive-card__title">Date Teklifi Yap 💕</h3>
+            </div>
+            <form id="dateProposalForm" class="interactive-form">
+              <div class="form-group">
+                <label for="proposalDate">Tarih Seç</label>
+                <input type="date" id="proposalDate" required>
+              </div>
+              <div class="form-group">
+                <label for="proposalTime">Saat Seç</label>
+                <input type="time" id="proposalTime" required>
+              </div>
+              <div class="form-group">
+                <label for="proposalActivity">Aktivite Türü</label>
+                <select id="proposalActivity" required>
+                  <option value="" disabled selected>Buluşmada ne yapalım?</option>
+                  <option value="☕ Kahve & Tatlı">☕ Kahve & Tatlı</option>
+                  <option value="🍿 Sinema & Popcorn">🍿 Sinema & Popcorn</option>
+                  <option value="🍽️ Romantik Akşam Yemeği">🍽️ Romantik Akşam Yemeği</option>
+                  <option value="🌿 Doğa Yürüyüşü">🌿 Doğa Yürüyüşü</option>
+                  <option value="🏠 Evde Film Gecesi">🏠 Evde Film Gecesi</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="proposalNote">Eklemek İstediğin Not</label>
+                <textarea id="proposalNote" placeholder="Sürpriz bir istek veya tatlı bir not yaz..." rows="2"></textarea>
+              </div>
+              <button type="submit" class="btn btn--primary btn--full">Teklifi WhatsApp ile İlet 💖</button>
+            </form>
+          </article>
+
+          <!-- Card 2: Complaint Box -->
+          <article class="interactive-card glass-card">
+            <div class="interactive-card__header">
+              <span class="interactive-card__icon">😤</span>
+              <h3 class="interactive-card__title">Şikayet Kutusu</h3>
+            </div>
+            <form id="complaintForm" class="interactive-form">
+              <div class="form-group">
+                <label for="complaintType">Şikayet Konusu</label>
+                <select id="complaintType" required>
+                  <option value="" disabled selected>Neden şikayetçiyiz?</option>
+                  <option value="📞 Beni Az Aradın">📞 Beni Az Aradın</option>
+                  <option value="😤 Trip Atıyorum">😤 Trip Atıyorum</option>
+                  <option value="🍫 Çikolata Borcun Var">🍫 Çikolata Borcun Var</option>
+                  <option value="😴 Uykumu Böldün">😴 Uykumu Böldün</option>
+                  <option value="📝 Diğer / Genel Şikayet">📝 Diğer / Genel Şikayet</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="complaintDetail">Şikayet Detayı</label>
+                <textarea id="complaintDetail" placeholder="İçini dök, ne yaptı bu çocuk yine..." rows="2" required></textarea>
+              </div>
+              <button type="submit" class="btn btn--primary btn--full">Şikayeti Gönder & Kaydet 😤</button>
+            </form>
+
+            <!-- Past Complaints Section -->
+            <div class="complaints-archive">
+              <h4 class="complaints-archive__title">Geçmiş Şikayetler (Arşiv)</h4>
+              <div id="complaintsList" class="complaints-list">
+                <!-- Will be dynamically populated by JS -->
+                <p class="complaints-list__empty">Henüz hiç şikayet yok, ne güzel! 🥰</p>
+              </div>
             </div>
           </article>
         </div>

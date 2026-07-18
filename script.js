@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initGalleryModal();
   initConfettiEngine();
   initMusicButton();
+  initDateProposal();
+  initComplaintBox();
 });
 
 /* --- 1. Floating Background Hearts Generator --- */
@@ -260,70 +262,258 @@ function animateConfetti(canvas, ctx) {
   }
 }
 
-/* --- 5. Interactive Ambient Melody Sound Effect --- */
+/* --- 5. Interactive Ambient Melody Playlist Player --- */
 function initMusicButton() {
-  const btn = document.getElementById('musicToggleBtn');
-  if (!btn) return;
+  const toggleBtn = document.getElementById('musicToggleBtn');
+  const nextBtn = document.getElementById('musicNextBtn');
+  const trackInfo = document.getElementById('musicTrackInfo');
+  const playerContainer = document.querySelector('.header__music-player');
 
+  if (!toggleBtn || !playerContainer) return;
+
+  const playlist = [
+    {
+      title: "Kisses 💋",
+      url: "https://assets.codepen.io/4358584/Anitek_-_01_-_Kisses.mp3"
+    },
+    {
+      title: "Sparkle ✨",
+      url: "https://assets.codepen.io/4358584/Anitek_-_02_-_Sparkle.mp3"
+    },
+    {
+      title: "Dawn 🌅",
+      url: "https://assets.codepen.io/4358584/Anitek_-_03_-_Dawn.mp3"
+    }
+  ];
+
+  let currentTrackIndex = 0;
   let isPlaying = false;
-  let audioCtx = null;
-  let intervalId = null;
+  let audio = new Audio();
+  audio.volume = 0.4; // Set a soft volume by default
 
-  const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]; // C D E F G A B C
+  function loadTrack(index) {
+    audio.src = playlist[index].url;
+    audio.load();
+    if (trackInfo) {
+      trackInfo.textContent = playlist[index].title;
+    }
+  }
 
-  btn.addEventListener('click', () => {
-    isPlaying = !isPlaying;
+  // Load the first track initially
+  loadTrack(currentTrackIndex);
 
+  function playMusic() {
+    audio.play().then(() => {
+      isPlaying = true;
+      playerContainer.classList.add('playing');
+      toggleBtn.querySelector('.header__music-label').textContent = 'Duraklat';
+      toggleBtn.querySelector('.header__music-icon').textContent = '⏸️';
+      if (nextBtn) nextBtn.style.display = 'inline-flex';
+    }).catch(err => {
+      console.warn("Müzik çalınamadı (etkileşim bekleniyor):", err);
+    });
+  }
+
+  function pauseMusic() {
+    audio.pause();
+    isPlaying = false;
+    playerContainer.classList.remove('playing');
+    toggleBtn.querySelector('.header__music-label').textContent = 'Melodi';
+    toggleBtn.querySelector('.header__music-icon').textContent = '🎵';
+  }
+
+  function nextTrack() {
+    currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+    loadTrack(currentTrackIndex);
     if (isPlaying) {
-      btn.style.background = 'var(--accent-rose)';
-      btn.style.color = '#FFF';
-      btn.querySelector('.header__music-label').textContent = 'Çalıyor... 💕';
-      startSoftMelody();
+      playMusic();
+    }
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    if (isPlaying) {
+      pauseMusic();
     } else {
-      btn.style.background = 'var(--glass-bg)';
-      btn.style.color = 'var(--text-main)';
-      btn.querySelector('.header__music-label').textContent = 'Melodi';
-      stopSoftMelody();
+      playMusic();
     }
   });
 
-  function startSoftMelody() {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-
-    playTone();
-    intervalId = setInterval(playTone, 1400);
+  if (nextBtn) {
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent main button click triggering if nested
+      nextTrack();
+    });
   }
 
-  function playTone() {
-    if (!isPlaying || !audioCtx) return;
+  // Handle song ending - auto play next
+  audio.addEventListener('ended', () => {
+    nextTrack();
+    playMusic();
+  });
 
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+  // Handle loading errors gracefully
+  audio.addEventListener('error', () => {
+    console.error("Müzik yükleme hatası. Sonraki şarkıya geçiliyor...");
+    nextTrack();
+  });
+}
 
-    const freq = notes[Math.floor(Math.random() * notes.length)];
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+/* --- 6. Date Proposal & Selection System --- */
+function initDateProposal() {
+  const form = document.getElementById('dateProposalForm');
+  if (!form) return;
 
-    gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.3);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
+  // Lütfen buraya kendi telefon numaranızı yazın (örn: '905321234567')
+  // Boş bırakılırsa WhatsApp, kullanıcının mesajı kime göndereceğini seçmesine izin verir.
+  const MY_PHONE_NUMBER = ''; 
 
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-    osc.start();
-    osc.stop(audioCtx.currentTime + 1.3);
-  }
+    const dateVal = document.getElementById('proposalDate').value;
+    const timeVal = document.getElementById('proposalTime').value;
+    const activityVal = document.getElementById('proposalActivity').value;
+    const noteVal = document.getElementById('proposalNote').value;
 
-  function stopSoftMelody() {
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
+    // Format date to local standard DD.MM.YYYY
+    let formattedDate = dateVal;
+    if (dateVal) {
+      const parts = dateVal.split('-');
+      if (parts.length === 3) {
+        formattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`;
+      }
     }
+
+    const message = `Aşkım, seninle harika bir plan yapalım mı? Buluşma Teklifim:
+📅 Tarih: ${formattedDate}
+⏰ Saat: ${timeVal}
+🎈 Aktivite: ${activityVal}
+💬 Not: ${noteVal || 'Yok (Sadece sen ol yeter 💕)'}
+
+Ne dersin? 🥰`;
+
+    const encodedMessage = encodeURIComponent(message);
+    let whatsappUrl = '';
+    
+    if (MY_PHONE_NUMBER) {
+      whatsappUrl = `https://api.whatsapp.com/send?phone=${MY_PHONE_NUMBER}&text=${encodedMessage}`;
+    } else {
+      whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+    }
+
+    // Launch confetti and open WhatsApp
+    triggerConfettiExplosion();
+    setTimeout(() => {
+      window.open(whatsappUrl, '_blank');
+    }, 800);
+  });
+}
+
+/* --- 7. Complaint Box System --- */
+function initComplaintBox() {
+  const form = document.getElementById('complaintForm');
+  const complaintsList = document.getElementById('complaintsList');
+
+  if (!form || !complaintsList) return;
+
+  // Load from local storage
+  let complaints = JSON.parse(localStorage.getItem('complaints')) || [];
+
+  function saveComplaints() {
+    localStorage.setItem('complaints', JSON.stringify(complaints));
   }
+
+  function renderComplaints() {
+    complaintsList.innerHTML = '';
+
+    if (complaints.length === 0) {
+      complaintsList.innerHTML = `<p class="complaints-list__empty">Henüz hiç şikayet yok, ne güzel! 🥰</p>`;
+      return;
+    }
+
+    // Sort by date (newest first)
+    const sortedComplaints = [...complaints].reverse();
+
+    sortedComplaints.forEach((c) => {
+      const item = document.createElement('div');
+      item.className = 'complaint-item';
+      
+      const isPending = c.status === 'pending';
+      const statusClass = isPending ? 'complaint-item__status--pending' : 'complaint-item__status--resolved';
+      const statusText = isPending ? 'İncelemede 🔍' : 'Affedildi 💕';
+      
+      let actionBtnHtml = '';
+      if (isPending) {
+        actionBtnHtml = `<button class="complaint-item__action-btn" data-id="${c.id}">Affet 💕</button>`;
+      }
+
+      item.innerHTML = `
+        <div class="complaint-item__header">
+          <span class="complaint-item__title">${c.type}</span>
+          <span class="complaint-item__date">${c.date}</span>
+        </div>
+        <p class="complaint-item__text">${c.detail}</p>
+        <div class="complaint-item__footer">
+          <span class="complaint-item__status ${statusClass}">${statusText}</span>
+          ${actionBtnHtml}
+        </div>
+      `;
+
+      complaintsList.appendChild(item);
+    });
+
+    // Bind event listeners to resolve buttons
+    const actionBtns = complaintsList.querySelectorAll('.complaint-item__action-btn');
+    actionBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = btn.getAttribute('data-id');
+        resolveComplaint(id);
+      });
+    });
+  }
+
+  function resolveComplaint(id) {
+    complaints = complaints.map(c => {
+      if (c.id === id) {
+        return { ...c, status: 'resolved' };
+      }
+      return c;
+    });
+    saveComplaints();
+    renderComplaints();
+    
+    // Celebratory confetti explosion for forgiveness!
+    triggerConfettiExplosion();
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const typeVal = document.getElementById('complaintType').value;
+    const detailVal = document.getElementById('complaintDetail').value;
+
+    const now = new Date();
+    const formattedDate = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const newComplaint = {
+      id: Date.now().toString(),
+      type: typeVal,
+      detail: detailVal,
+      date: formattedDate,
+      status: 'pending'
+    };
+
+    complaints.push(newComplaint);
+    saveComplaints();
+    renderComplaints();
+
+    // Reset form
+    form.reset();
+
+    // Trigger sweet feedback confetti
+    triggerConfettiExplosion();
+  });
+
+  // Initial render
+  renderComplaints();
 }
