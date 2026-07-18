@@ -20,6 +20,15 @@ function initDatePlanner() {
   const MY_PHONE_NUMBER = ''; // Boş bırakılırsa WhatsApp, kullanıcının alıcıyı seçmesini sağlar.
   let currentPlans = [];
 
+  // LocalStorage Fallback Reader
+  function getLocalPlans() {
+    try {
+      return JSON.parse(localStorage.getItem('datePlans')) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   // Helper: Format YYYY-MM-DD to DD.MM.YYYY
   function formatDisplayDate(dateStr) {
     if (!dateStr) return '';
@@ -30,19 +39,43 @@ function initDatePlanner() {
     return dateStr;
   }
 
+  // Tarih karşılaştırma: Plan tarihinin geçip geçmediğini kontrol eder
+  function isPlanActive(dateStr) {
+    if (!dateStr) return false;
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return true;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const planDate = new Date(parts[0], parts[1] - 1, parts[2]);
+    planDate.setHours(0, 0, 0, 0);
+
+    // Gün cinsinden fark (planDate - today)
+    const diffTime = planDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Tarihi geçmediyse (bugün veya gelecekteyse) aktiftir
+    return diffDays >= 0;
+  }
+
   // 1. Render Saved Plans
   function renderPlans(plans) {
     currentPlans = plans || [];
+
+    // Kullanıcının kuralı: Date tarihinden sonra otomatik kaybolsun, tarihi geçene kadar kalsın.
+    const activePlans = currentPlans.filter(p => isPlanActive(p.date));
+
     savedDatesList.innerHTML = '';
 
-    if (currentPlans.length === 0) {
-      savedDatesList.innerHTML = '<p class="planner-list__empty">Henüz kaydedilmiş plan yok! 🥰</p>';
+    if (activePlans.length === 0) {
+      savedDatesList.innerHTML = '<p class="planner-list__empty">Henüz kaydedilmiş aktif plan yok! 🥰</p>';
       updateCountdown([]);
       return;
     }
 
     // Sort plans by date (newest created first)
-    const sortedPlans = [...currentPlans].sort((a, b) => {
+    const sortedPlans = [...activePlans].sort((a, b) => {
       return (b.id || '') > (a.id || '') ? 1 : -1;
     });
 
@@ -76,7 +109,7 @@ function initDatePlanner() {
       });
     });
 
-    updateCountdown(currentPlans);
+    updateCountdown(activePlans);
   }
 
   // 2. Delete Plan
@@ -84,9 +117,12 @@ function initDatePlanner() {
     if (typeof dbDeletePlan === 'function') {
       dbDeletePlan(id);
     }
+    // LocalStorage yedeklemesinden de sil
+    let local = getLocalPlans().filter(p => p.id !== id);
+    localStorage.setItem('datePlans', JSON.stringify(local));
   }
 
-  // 3. Calculate and Update Upcoming Countdown Alert
+  // 3. Calculate and Update Upcoming Countdown Alert (Tarihi gerçekleşene kadar durur)
   function updateCountdown(plans) {
     if (!upcomingPanel || !upcomingTitle || !upcomingCountdown || !upcomingDetail) return;
 
@@ -111,7 +147,8 @@ function initDatePlanner() {
       const diffTime = planDate - today;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (diffDays >= 0 && diffDays <= 7) {
+      // Sadece gelecekteki veya bugünkü planlar (7 gün kısıtlaması kaldırıldı, tarihi geçene kadar görünür)
+      if (diffDays >= 0) {
         if (!closest || diffDays < closest.daysLeft) {
           closest = { plan, daysLeft: diffDays };
         }
@@ -171,6 +208,12 @@ function initDatePlanner() {
     if (typeof dbAddPlan === 'function') {
       dbAddPlan(newPlan);
     }
+    
+    // LocalStorage yedeklemesine de ekle
+    let local = getLocalPlans();
+    local.push({ ...newPlan, id: Date.now().toString() });
+    localStorage.setItem('datePlans', JSON.stringify(local));
+
     form.reset();
 
     if (typeof triggerConfettiExplosion === 'function') {
@@ -188,6 +231,12 @@ function initDatePlanner() {
     if (typeof dbAddPlan === 'function') {
       dbAddPlan(newPlan);
     }
+
+    // LocalStorage yedeklemesine de ekle
+    let local = getLocalPlans();
+    local.push({ ...newPlan, id: Date.now().toString() });
+    localStorage.setItem('datePlans', JSON.stringify(local));
+
     form.reset();
 
     const formattedDate = formatDisplayDate(newPlan.date);
@@ -217,10 +266,25 @@ function initDatePlanner() {
     }, 800);
   });
 
-  // 7. Realtime Firebase Listener
+  // 7. Realtime Firebase Listener & Auto Migration from LocalStorage
   if (typeof dbListenPlans === 'function') {
-    dbListenPlans((plans) => {
-      renderPlans(plans);
+    dbListenPlans((firebasePlans) => {
+      const localPlans = getLocalPlans();
+
+      // Firebase henüz boş ama yerel depolamada eski kayıtlı plan varsa otomatik Firebase'e taşı
+      if ((!firebasePlans || firebasePlans.length === 0) && localPlans.length > 0) {
+        localPlans.forEach(p => {
+          if (typeof dbAddPlan === 'function') {
+            dbAddPlan(p);
+          }
+        });
+        renderPlans(localPlans);
+      } else {
+        renderPlans(firebasePlans);
+      }
     });
+  } else {
+    // Fallback if Firebase not loaded
+    renderPlans(getLocalPlans());
   }
 }
