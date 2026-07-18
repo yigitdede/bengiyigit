@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initSurpriseButton();
   initGalleryModal();
   initConfettiEngine();
-  initMusicButton();
   // initDateProposal is handled in planner.js
   initComplaintBox();
 });
@@ -52,8 +51,10 @@ function initFloatingHearts() {
   setInterval(createHeart, 1200);
 }
 
-/* --- 2. Surprise Button & Quotes System --- */
-const sweetQuotes = [
+/* --- 2. Dynamic Love Notes & Surprise Quotes System (Firebase Powered) --- */
+
+// Fallback love notes (Firebase'de henüz veri yoksa kullanılan yedek liste)
+const defaultSweetQuotes = [
   "Seninle geçen her saniye, hayatımın en değerli hediyesi... 💕",
   "Gözlerinin içindeki o sıcak ışık, benim en güvenli ve huzurlu limanım. ✨",
   "İyi ki varsın, iyi ki hayatımdasın. Seni her gün daha çok seviyorum! 🌸",
@@ -65,16 +66,18 @@ const sweetQuotes = [
   "Sen benim bu dünyadaki en güzel sürprizimsin! ✨"
 ];
 
-let lastQuoteIndex = -1;
+let activeLoveNotes = [...defaultSweetQuotes];
+let lastNoteIndex = -1;
 
-function getRandomQuote() {
+function getRandomLoveNote() {
+  const currentList = activeLoveNotes.length > 0 ? activeLoveNotes : defaultSweetQuotes;
   let randomIndex;
   do {
-    randomIndex = Math.floor(Math.random() * sweetQuotes.length);
-  } while (randomIndex === lastQuoteIndex && sweetQuotes.length > 1);
+    randomIndex = Math.floor(Math.random() * currentList.length);
+  } while (randomIndex === lastNoteIndex && currentList.length > 1);
   
-  lastQuoteIndex = randomIndex;
-  return sweetQuotes[randomIndex];
+  lastNoteIndex = randomIndex;
+  return currentList[randomIndex];
 }
 
 function initSurpriseButton() {
@@ -87,10 +90,21 @@ function initSurpriseButton() {
 
   if (!surpriseBtn || !surpriseModal) return;
 
+  // Firebase Realtime DB dinleyicisi: lovenotes düğümü değişince otomatik listeyi günceller
+  if (typeof dbListenLoveNotes === 'function') {
+    dbListenLoveNotes((firebaseNotes) => {
+      if (firebaseNotes && firebaseNotes.length > 0) {
+        activeLoveNotes = firebaseNotes;
+      } else {
+        activeLoveNotes = [...defaultSweetQuotes];
+      }
+    });
+  }
+
   function showSurprise() {
-    // Set text
+    // Firebase veya fallback listesinden rastgele bir not seç
     if (surpriseQuoteText) {
-      surpriseQuoteText.textContent = `"${getRandomQuote()}"`;
+      surpriseQuoteText.textContent = `"${getRandomLoveNote()}"`;
     }
     
     // Show modal
@@ -113,7 +127,9 @@ function initSurpriseButton() {
 
   if (anotherQuoteBtn) {
     anotherQuoteBtn.addEventListener('click', () => {
-      surpriseQuoteText.textContent = `"${getRandomQuote()}"`;
+      if (surpriseQuoteText) {
+        surpriseQuoteText.textContent = `"${getRandomLoveNote()}"`;
+      }
       triggerConfettiExplosion();
     });
   }
@@ -262,167 +278,7 @@ function animateConfetti(canvas, ctx) {
   }
 }
 
-/* ==========================================
-   ŞARKI LİSTESİ - Buraya kendi şarkılarını ekle!
-   1. MP3 dosyasını assets/music/ klasörüne kopyala
-   2. Aşağıya { title: "Şarkı Adı 🎵", url: "assets/music/dosyaadi.mp3" } ekle
-   ========================================== */
-const PLAYLIST = [
-  { title: "Şarkı 1 💕", url: "assets/music/sarki1.mp3" },
-  { title: "Şarkı 2 🌸", url: "assets/music/sarki2.mp3" },
-  { title: "Şarkı 3 ✨", url: "assets/music/sarki3.mp3" },
-];
-
-/* --- 5. Interactive Ambient Melody Playlist Player --- */
-function initMusicButton() {
-  const toggleBtn = document.getElementById('musicToggleBtn');
-  const nextBtn = document.getElementById('musicNextBtn');
-  const trackInfo = document.getElementById('musicTrackInfo');
-  const playerContainer = document.querySelector('.header__music-player');
-  const playlistBtn = document.getElementById('musicPlaylistBtn');
-  const playlistPanel = document.getElementById('musicPlaylistPanel');
-  const playlistItems = document.getElementById('musicPlaylistItems');
-
-  if (!toggleBtn || !playerContainer) return;
-
-  let currentTrackIndex = 0;
-  let isPlaying = false;
-  let audio = new Audio();
-  audio.volume = 0.4;
-
-  // Playlist panel: render items
-  function renderPlaylist() {
-    if (!playlistItems) return;
-    playlistItems.innerHTML = '';
-    PLAYLIST.forEach((track, index) => {
-      const li = document.createElement('li');
-      li.className = 'music-playlist-panel__item' + (index === currentTrackIndex ? ' active' : '');
-      li.dataset.index = index;
-      li.innerHTML = `
-        <span class="music-playlist-panel__item-icon">${index === currentTrackIndex && isPlaying ? '▶️' : '🎵'}</span>
-        <span class="music-playlist-panel__item-title">${track.title}</span>
-      `;
-      li.addEventListener('click', () => {
-        currentTrackIndex = index;
-        loadTrack(currentTrackIndex);
-        playMusic();
-        renderPlaylist();
-        closePlaylistPanel();
-      });
-      playlistItems.appendChild(li);
-    });
-  }
-
-  function openPlaylistPanel() {
-    if (!playlistPanel) return;
-    renderPlaylist();
-    playlistPanel.removeAttribute('hidden');
-  }
-
-  function closePlaylistPanel() {
-    if (playlistPanel) playlistPanel.setAttribute('hidden', '');
-  }
-
-  function togglePlaylistPanel() {
-    if (!playlistPanel) return;
-    if (playlistPanel.hasAttribute('hidden')) {
-      openPlaylistPanel();
-    } else {
-      closePlaylistPanel();
-    }
-  }
-
-  function loadTrack(index) {
-    audio.src = PLAYLIST[index].url;
-    audio.load();
-    if (trackInfo) {
-      trackInfo.textContent = PLAYLIST[index].title;
-    }
-  }
-
-  // Load the first track initially
-  loadTrack(currentTrackIndex);
-
-  function playMusic() {
-    audio.play().then(() => {
-      isPlaying = true;
-      playerContainer.classList.add('playing');
-      toggleBtn.querySelector('.header__music-label').textContent = 'Duraklat';
-      toggleBtn.querySelector('.header__music-icon').textContent = '⏸️';
-      if (nextBtn) nextBtn.style.display = 'inline-flex';
-    }).catch(err => {
-      console.warn("Müzik çalınamadı (etkileşim bekleniyor):", err);
-    });
-  }
-
-  function pauseMusic() {
-    audio.pause();
-    isPlaying = false;
-    playerContainer.classList.remove('playing');
-    toggleBtn.querySelector('.header__music-label').textContent = 'Melodi';
-    toggleBtn.querySelector('.header__music-icon').textContent = '🎵';
-  }
-
-  function nextTrack() {
-    currentTrackIndex = (currentTrackIndex + 1) % PLAYLIST.length;
-    loadTrack(currentTrackIndex);
-    if (isPlaying) playMusic();
-    renderPlaylist();
-  }
-
-  toggleBtn.addEventListener('click', () => {
-    if (isPlaying) {
-      pauseMusic();
-    } else {
-      playMusic();
-    }
-  });
-
-  if (nextBtn) {
-    nextBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      nextTrack();
-    });
-  }
-
-  // Playlist button: open/close panel
-  if (playlistBtn) {
-    playlistBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      togglePlaylistPanel();
-    });
-  }
-
-  // Track info: open panel on click
-  if (trackInfo) {
-    trackInfo.addEventListener('click', () => togglePlaylistPanel());
-    trackInfo.style.cursor = 'pointer';
-  }
-
-  // Close panel on click outside
-  document.addEventListener('click', (e) => {
-    if (playlistPanel && !playlistPanel.hasAttribute('hidden')) {
-      if (!playerContainer.contains(e.target)) {
-        closePlaylistPanel();
-      }
-    }
-  });
-
-  audio.addEventListener('ended', () => {
-    nextTrack();
-    playMusic();
-  });
-
-  audio.addEventListener('error', () => {
-    console.warn("Şarkı yükleme hatası. Sonraki şarkıya geçiliyor...");
-    nextTrack();
-  });
-
-  // Load initial track
-  loadTrack(currentTrackIndex);
-}
-
-/* --- 7. Complaint Box System (Firebase Realtime DB) --- */
+/* --- 5. Complaint Box System (Firebase Realtime DB) --- */
 function initComplaintBox() {
   const form = document.getElementById('complaintForm');
   const complaintsList = document.getElementById('complaintsList');
@@ -437,10 +293,9 @@ function initComplaintBox() {
       return;
     }
 
-    // Sort by date (newest first — use id which is firebase timestamp)
+    // Sort by date (newest first — push key based)
     const sortedComplaints = [...complaints].sort((a, b) => {
-      // Firebase push keys are lexicographically ordered by time
-      return b.id > a.id ? 1 : -1;
+      return (b.id || '') > (a.id || '') ? 1 : -1;
     });
 
     sortedComplaints.forEach((c) => {
@@ -476,8 +331,9 @@ function initComplaintBox() {
     actionBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
-        dbUpdateComplaint(id, { status: 'resolved' });
-        // Firebase listener will auto-refresh the list
+        if (typeof dbUpdateComplaint === 'function') {
+          dbUpdateComplaint(id, { status: 'resolved' });
+        }
         triggerConfettiExplosion();
       });
     });
@@ -499,14 +355,17 @@ function initComplaintBox() {
       status: 'pending'
     };
 
-    // Save to Firebase; listener auto-refreshes the list
-    dbAddComplaint(newComplaint);
+    if (typeof dbAddComplaint === 'function') {
+      dbAddComplaint(newComplaint);
+    }
     form.reset();
     triggerConfettiExplosion();
   });
 
-  // Real-time listener: renders whenever Firebase data changes
-  dbListenComplaints((complaints) => {
-    renderComplaints(complaints);
-  });
+  // Real-time listener
+  if (typeof dbListenComplaints === 'function') {
+    dbListenComplaints((complaints) => {
+      renderComplaints(complaints);
+    });
+  }
 }

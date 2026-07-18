@@ -18,15 +18,7 @@ function initDatePlanner() {
   if (!form || !saveOnlyBtn || !savedDatesList) return;
 
   const MY_PHONE_NUMBER = ''; // Boş bırakılırsa WhatsApp, kullanıcının alıcıyı seçmesini sağlar.
-
-  // 1. LocalStorage Operations
-  function getPlans() {
-    return JSON.parse(localStorage.getItem('datePlans')) || [];
-  }
-
-  function savePlans(plans) {
-    localStorage.setItem('datePlans', JSON.stringify(plans));
-  }
+  let currentPlans = [];
 
   // Helper: Format YYYY-MM-DD to DD.MM.YYYY
   function formatDisplayDate(dateStr) {
@@ -38,18 +30,21 @@ function initDatePlanner() {
     return dateStr;
   }
 
-  // 2. Render Saved Plans
-  function renderPlans() {
-    const plans = getPlans();
+  // 1. Render Saved Plans
+  function renderPlans(plans) {
+    currentPlans = plans || [];
     savedDatesList.innerHTML = '';
 
-    if (plans.length === 0) {
+    if (currentPlans.length === 0) {
       savedDatesList.innerHTML = '<p class="planner-list__empty">Henüz kaydedilmiş plan yok! 🥰</p>';
+      updateCountdown([]);
       return;
     }
 
-    // Sort plans by date (newest first)
-    const sortedPlans = [...plans].reverse();
+    // Sort plans by date (newest created first)
+    const sortedPlans = [...currentPlans].sort((a, b) => {
+      return (b.id || '') > (a.id || '') ? 1 : -1;
+    });
 
     sortedPlans.forEach((plan) => {
       const item = document.createElement('div');
@@ -75,28 +70,27 @@ function initDatePlanner() {
     // Bind delete event listeners
     const deleteBtns = savedDatesList.querySelectorAll('.planner-item__delete-btn');
     deleteBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
         deletePlan(id);
       });
     });
+
+    updateCountdown(currentPlans);
   }
 
-  // 3. Delete Plan
+  // 2. Delete Plan
   function deletePlan(id) {
-    let plans = getPlans();
-    plans = plans.filter(p => p.id !== id);
-    savePlans(plans);
-    renderPlans();
-    updateCountdown();
+    if (typeof dbDeletePlan === 'function') {
+      dbDeletePlan(id);
+    }
   }
 
-  // 4. Calculate and Update Upcoming Countdown Alert
-  function updateCountdown() {
+  // 3. Calculate and Update Upcoming Countdown Alert
+  function updateCountdown(plans) {
     if (!upcomingPanel || !upcomingTitle || !upcomingCountdown || !upcomingDetail) return;
 
-    const plans = getPlans();
-    if (plans.length === 0) {
+    if (!plans || plans.length === 0) {
       upcomingPanel.style.display = 'none';
       return;
     }
@@ -104,36 +98,30 @@ function initDatePlanner() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const activePlans = [];
+    let closest = null;
 
     plans.forEach(plan => {
+      if (!plan.date) return;
       const parts = plan.date.split('-');
       if (parts.length !== 3) return;
 
-      // Create local date object avoiding UTC shift issues
-      const planDateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-      planDateObj.setHours(0, 0, 0, 0);
+      const planDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      planDate.setHours(0, 0, 0, 0);
 
-      const diffTime = planDateObj.getTime() - today.getTime();
+      const diffTime = planDate - today;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      // Consider plan active if it is today or in the future
       if (diffDays >= 0 && diffDays <= 7) {
-        activePlans.push({
-          plan: plan,
-          daysLeft: diffDays
-        });
+        if (!closest || diffDays < closest.daysLeft) {
+          closest = { plan, daysLeft: diffDays };
+        }
       }
     });
 
-    if (activePlans.length === 0) {
+    if (!closest) {
       upcomingPanel.style.display = 'none';
       return;
     }
-
-    // Sort by closest date
-    activePlans.sort((a, b) => a.daysLeft - b.daysLeft);
-    const closest = activePlans[0];
 
     // Render Countdown UI
     const formattedDate = formatDisplayDate(closest.plan.date);
@@ -141,86 +129,75 @@ function initDatePlanner() {
     if (closest.daysLeft === 0) {
       upcomingTitle.textContent = 'Bugün Buluşma Günümüz! 🥰';
       upcomingCountdown.textContent = 'Date günümüz geldi çattı! Bugün harika vakit geçireceğiz. 💕';
+    } else if (closest.daysLeft === 1) {
+      upcomingTitle.textContent = 'Yarın Buluşuyoruz! 🌸';
+      upcomingCountdown.textContent = 'Date günümüze son 1 gün kaldı! Hazır mısın? 💕';
     } else {
-      upcomingTitle.textContent = 'Yaklaşan Date Planımız! 📅';
-      upcomingCountdown.innerHTML = `Buluşmamıza son <strong>${closest.daysLeft} gün</strong> kaldı! 💕`;
+      upcomingTitle.textContent = 'Yaklaşan Date Planımız! 💖';
+      upcomingCountdown.textContent = `Date günümüze son ${closest.daysLeft} gün kaldı! 💕`;
     }
 
-    upcomingDetail.textContent = `${closest.plan.activity} - 📅 ${formattedDate} - ⏰ ${closest.plan.time}`;
-    upcomingPanel.style.display = 'block';
+    upcomingDetail.textContent = `${closest.plan.activity} - ${formattedDate} (${closest.plan.time})`;
+    upcomingPanel.style.display = 'flex';
   }
 
-  // Helper: Gather plan data from form inputs
+  // 4. Form Data Collection Helper
   function getFormData() {
-    const dateVal = document.getElementById('proposalDate').value;
-    const timeVal = document.getElementById('proposalTime').value;
-    const activityVal = document.getElementById('proposalActivity').value;
-    const noteVal = document.getElementById('proposalNote').value;
+    const date = document.getElementById('proposalDate').value;
+    const time = document.getElementById('proposalTime').value;
+    const activity = document.getElementById('proposalActivity').value;
+    const note = document.getElementById('proposalNote').value.trim();
 
-    if (!dateVal || !timeVal || !activityVal) {
-      return null;
-    }
-
-    const formattedCreatedAt = new Date().toLocaleString('tr-TR');
+    if (!date || !time || !activity) return null;
 
     return {
-      id: Date.now().toString(),
-      date: dateVal,
-      time: timeVal,
-      activity: activityVal,
-      note: noteVal,
-      createdAt: formattedCreatedAt
+      date,
+      time,
+      activity,
+      note
     };
   }
 
-  // 5. Save Only Handler
+  // 5. Button 1: Save Only
   saveOnlyBtn.addEventListener('click', (e) => {
     e.preventDefault();
     const newPlan = getFormData();
 
     if (!newPlan) {
-      // Trigger HTML5 built-in validation by triggering form submit temporarily
       form.reportValidity();
       return;
     }
 
-    const plans = getPlans();
-    plans.push(newPlan);
-    savePlans(plans);
-
-    // Refresh UI
-    renderPlans();
-    updateCountdown();
+    if (typeof dbAddPlan === 'function') {
+      dbAddPlan(newPlan);
+    }
     form.reset();
 
-    // Trigger sweet feedback confetti (from script.js global scope)
     if (typeof triggerConfettiExplosion === 'function') {
       triggerConfettiExplosion();
     }
   });
 
-  // 6. WhatsApp Submit Handler (Save & Send)
+  // 6. Button 2: Save & Send via WhatsApp
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const newPlan = getFormData();
+
     if (!newPlan) return;
 
-    // Save to localStorage
-    const plans = getPlans();
-    plans.push(newPlan);
-    savePlans(plans);
+    if (typeof dbAddPlan === 'function') {
+      dbAddPlan(newPlan);
+    }
+    form.reset();
 
-    // Build WhatsApp message
     const formattedDate = formatDisplayDate(newPlan.date);
-    const noteText = newPlan.note ? newPlan.note : 'Yok (Sadece sen ol yeter 💕)';
+    const noteLine = newPlan.note ? `\n💬 *Not:* ${newPlan.note}` : '';
 
-    const message = `Aşkım, seninle harika bir plan yapalım mı? Buluşma Teklifim:
-📅 Tarih: ${formattedDate}
-⏰ Saat: ${newPlan.time}
-🎈 Aktivite: ${newPlan.activity}
-💬 Not: ${noteText}
-
-Ne dersin? 🥰`;
+    const message = `Bengi'm ile Harika Bir Date Planı! 💕\n\n` +
+                    `📅 *Tarih:* ${formattedDate}\n` +
+                    `⏰ *Saat:* ${newPlan.time}\n` +
+                    `✨ *Aktivite:* ${newPlan.activity}${noteLine}\n\n` +
+                    `Seninle buluşmak için sabırsızlanıyorum! 🥰`;
 
     const encodedMessage = encodeURIComponent(message);
     let whatsappUrl = '';
@@ -231,12 +208,6 @@ Ne dersin? 🥰`;
       whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
     }
 
-    // Refresh UI
-    renderPlans();
-    updateCountdown();
-    form.reset();
-
-    // Launch confetti and open WhatsApp after delay
     if (typeof triggerConfettiExplosion === 'function') {
       triggerConfettiExplosion();
     }
@@ -246,7 +217,10 @@ Ne dersin? 🥰`;
     }, 800);
   });
 
-  // Initial Load and Render
-  renderPlans();
-  updateCountdown();
+  // 7. Realtime Firebase Listener
+  if (typeof dbListenPlans === 'function') {
+    dbListenPlans((plans) => {
+      renderPlans(plans);
+    });
+  }
 }

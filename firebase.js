@@ -20,6 +20,7 @@ const db = firebase.database();
 // Veritabanı yolu sabitleri
 const COMPLAINTS_PATH = 'complaints';
 const PLANS_PATH = 'datePlans';
+const LOVENOTES_PATH = 'lovenotes';
 
 /* ---- Şikayet (Complaints) Yardımcı Fonksiyonlar ---- */
 
@@ -82,4 +83,26 @@ function dbAddPlan(plan) {
  */
 function dbDeletePlan(id) {
   return db.ref(`${PLANS_PATH}/${id}`).remove();
+}
+
+/* ---- Sevgi Notları (Love Notes) Yardımcı Fonksiyonlar ---- */
+
+/**
+ * Firebase Realtime Database'deki lovenotes verilerini gerçek zamanlı dinler.
+ * Veri string dizisi veya obje şeklinde gelse de hepsini düz metin array'ine çevirir.
+ * @param {function} callback - String dizisi şeklinde sevgi notları ile çağrılır.
+ */
+function dbListenLoveNotes(callback) {
+  db.ref(LOVENOTES_PATH).on('value', (snapshot) => {
+    const raw = snapshot.val();
+    let notes = [];
+    if (raw) {
+      if (Array.isArray(raw)) {
+        notes = raw.filter(n => typeof n === 'string' || (n && n.text));
+      } else if (typeof raw === 'object') {
+        notes = Object.values(raw).map(val => (typeof val === 'string' ? val : val.text || val.note || JSON.stringify(val)));
+      }
+    }
+    callback(notes);
+  });
 }

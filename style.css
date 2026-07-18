@@ -153,36 +153,7 @@ body {
   animation: heartbeat 2s infinite ease-in-out;
 }
 
-.header__music-player {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.header__music-info {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(10px);
-  transition: all var(--transition-normal);
-  font-weight: 500;
-  background: rgba(232, 165, 152, 0.1);
-  padding: 0.3rem 0.7rem;
-  border-radius: var(--radius-sm);
-}
-
-.header__music-player.playing .header__music-info {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(0);
-}
-
-.header__music-btn {
+.header__badge {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -190,41 +161,13 @@ body {
   border: 1px solid var(--glass-border);
   padding: 0.4rem 0.9rem;
   border-radius: var(--radius-full);
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--text-main);
-  cursor: pointer;
   box-shadow: 0 4px 12px rgba(220, 180, 180, 0.15);
-  transition: all var(--transition-fast);
-}
-
-.header__music-btn:hover {
-  transform: translateY(-2px);
-  background: var(--accent-cream);
-  border-color: var(--accent-rose);
-}
-
-.header__music-btn--next {
-  padding: 0.4rem 0.6rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.header__music-player.playing .header__music-icon {
-  animation: spinMusic 4s infinite linear;
-  display: inline-block;
-}
-
-@keyframes spinMusic {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 /* --- Hero Section --- */
