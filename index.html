@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Seninle geçen her an çok değerli! İkimiz için özel anı ve sürpriz websitesi.">
+  <title>İkimizin Hikayesi 💕 | Seninle Geçen Her An Çok Değerli</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=Sacramento&display=swap" rel="stylesheet">
+  
+  <!-- CSS Style -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Floating Heart Background Particles -->
+  <div id="bgHeartsContainer" class="bg-hearts-container" aria-hidden="true"></div>
+
+  <!-- Header / Nav -->
+  <header class="header">
+    <div class="header__container">
+      <a href="#" class="header__logo">
+        <span class="header__logo-icon">💖</span>
+        <span class="header__logo-text">İkimizin Hikayesi</span>
+      </a>
+      <div class="header__actions">
+        <button id="musicToggleBtn" class="header__music-btn" aria-label="Müzik Aç/Kapat" title="Sanki fonda tatlı bir melodi çalıyor...">
+          <span class="header__music-icon">🎵</span>
+          <span class="header__music-label">Melodi</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+      <div class="hero__container">
+        <div class="hero__card glass-card">
+          <div class="hero__image-wrapper">
+            <div class="hero__image-frame">
+              <img id="heroImage" src="assets/images/hero.jpg" alt="İkimizin Fotoğrafı" class="hero__image">
+            </div>
+            <div class="hero__badge">
+              <span>💖 Sonsuza Dek</span>
+            </div>
+          </div>
+          
+          <div class="hero__content">
+            <h1 class="hero__title">Seninle geçen her an çok değerli ✨</h1>
+            <p class="hero__subtitle">
+              Hayatıma kattığın tüm güzellikler, gülücükler ve tatlı anılar için teşekkür ederim. 
+              Bu sayfa, seninle paylaştığımız en özel anların küçük bir hediyesi.
+            </p>
+            <div class="hero__tags">
+              <span class="tag">🌸 Mutluluk</span>
+              <span class="tag">☕ Tatlı Anlar</span>
+              <span class="tag">✨ Sonsuz Sevgi</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Gallery Section -->
+    <section id="gallery" class="gallery-section">
+      <div class="gallery__container">
+        <div class="section-header">
+          <span class="section-header__tag">📸 Tatlı Anılarımız</span>
+          <h2 class="section-header__title">Unutulmaz Anlar Galerisi</h2>
+          <p class="section-header__subtitle">Fotoğrafların üzerine gelerek detayları görebilir, tıklayarak anıyı büyütebilirsin.</p>
+        </div>
+
+        <div class="gallery__grid">
+          <!-- Memory 1 -->
+          <article class="gallery-card glass-card" data-memory-id="1">
+            <div class="gallery-card__image-wrapper">
+              <img src="assets/images/memory1.jpg" alt="Birlikte İlk Günümüz" class="gallery-card__image" loading="lazy">
+              <div class="gallery-card__overlay">
+                <span class="gallery-card__heart">❤️</span>
+                <span class="gallery-card__hover-text">Anıyı Gör</span>
+              </div>
+            </div>
+            <div class="gallery-card__content">
+              <span class="gallery-card__date">Anı #1</span>
+              <h3 class="gallery-card__title">Göz Göze Geldiğimiz O Gün</h3>
+              <p class="gallery-card__desc">Kalp atışlarımın ilk defa seninle bu kadar hızlı attığını hissettiğim an...</p>
+            </div>
+          </article>
+
+          <!-- Memory 2 -->
+          <article class="gallery-card glass-card" data-memory-id="2">
+            <div class="gallery-card__image-wrapper">
+              <img src="assets/images/memory2.jpg" alt="Kahve & Sohbetler" class="gallery-card__image" loading="lazy">
+              <div class="gallery-card__overlay">
+                <span class="gallery-card__heart">❤️</span>
+                <span class="gallery-card__hover-text">Anıyı Gör</span>
+              </div>
+            </div>
+            <div class="gallery-card__content">
+              <span class="gallery-card__date">Anı #2</span>
+              <h3 class="gallery-card__title">Sıcak Kahve & Uzun Sohbetler</h3>
+              <p class="gallery-card__desc">Zamanın nasıl geçtiğini unuttuğumuz, kahkahalarla dolu tatlı akşamlar.</p>
+            </div>
+          </article>
+
+          <!-- Memory 3 -->
+          <article class="gallery-card glass-card" data-memory-id="3">
+            <div class="gallery-card__image-wrapper">
+              <img src="assets/images/memory3.jpg" alt="Bahar Pikniği" class="gallery-card__image" loading="lazy">
+              <div class="gallery-card__overlay">
+                <span class="gallery-card__heart">❤️</span>
+                <span class="gallery-card__hover-text">Anıyı Gör</span>
+              </div>
+            </div>
+            <div class="gallery-card__content">
+              <span class="gallery-card__date">Anı #3</span>
+              <h3 class="gallery-card__title">Güneşli Bahar Günleri</h3>
+              <p class="gallery-card__desc">Çiçeklerin açtığı, ellerimizin hiç ayrılmadığı en huzurlu anlarımız.</p>
+            </div>
+          </article>
+
+          <!-- Memory 4 -->
+          <article class="gallery-card glass-card" data-memory-id="4">
+            <div class="gallery-card__image-wrapper">
+              <img src="assets/images/memory4.jpg" alt="Yıldızların Altında" class="gallery-card__image" loading="lazy">
+              <div class="gallery-card__overlay">
+                <span class="gallery-card__heart">❤️</span>
+                <span class="gallery-card__hover-text">Anıyı Gör</span>
+              </div>
+            </div>
+            <div class="gallery-card__content">
+              <span class="gallery-card__date">Anı #4</span>
+              <h3 class="gallery-card__title">Yıldızların Altındaki Hayaller</h3>
+              <p class="gallery-card__desc">Gökyüzüne bakıp geleceğe dair fısıldadığımız tüm güzel dilekler...</p>
+            </div>
+          </article>
+
+          <!-- Memory 5 -->
+          <article class="gallery-card glass-card" data-memory-id="5">
+            <div class="gallery-card__image-wrapper">
+              <img src="assets/images/memory5.jpg" alt="Unutulmaz Yolculuklar" class="gallery-card__image" loading="lazy">
+              <div class="gallery-card__overlay">
+                <span class="gallery-card__heart">❤️</span>
+                <span class="gallery-card__hover-text">Anıyı Gör</span>
+              </div>
+            </div>
+            <div class="gallery-card__content">
+              <span class="gallery-card__date">Anı #5</span>
+              <h3 class="gallery-card__title">Birlikte Yeni Yollar</h3>
+              <p class="gallery-card__desc">Seninle çıkılan her yolculuk, hayatımın en güzel macerasına dönüşüyor.</p>
+            </div>
+          </article>
+
+          <!-- Memory 6 -->
+          <article class="gallery-card glass-card" data-memory-id="6">
+            <div class="gallery-card__image-wrapper">
+              <img src="assets/images/memory6.jpg" alt="Küçük Sürprizler" class="gallery-card__image" loading="lazy">
+              <div class="gallery-card__overlay">
+                <span class="gallery-card__heart">❤️</span>
+                <span class="gallery-card__hover-text">Anıyı Gör</span>
+              </div>
+            </div>
+            <div class="gallery-card__content">
+              <span class="gallery-card__date">Anı #6</span>
+              <h3 class="gallery-card__title">Gülüşüne Aşık Olduğum An</h3>
+              <p class="gallery-card__desc">Yüzündeki tek bir tebessüm bile günümü aydınlatmaya yetiyor.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Surprise Section -->
+    <section id="surprise" class="surprise-section">
+      <div class="surprise__container">
+        <div class="surprise__card glass-card">
+          <div class="surprise__icon-wrapper">
+            <span class="surprise__floating-sparkle">✨</span>
+            <span class="surprise__floating-sparkle">💖</span>
+          </div>
+          <h2 class="surprise__title">Küçük Bir Sürpriz Zamanı! 🎁</h2>
+          <p class="surprise__subtitle">
+            Aşağıdaki kalbe basarak senin için hazırladığım tatlı notları keşfet ve konfeti yağmurunu başlat!
+          </p>
+
+          <button id="surpriseBtn" class="surprise__button" aria-label="Sürpriz Notu Aç">
+            <div class="surprise__button-pulse"></div>
+            <span class="surprise__button-icon">💖</span>
+            <span class="surprise__button-text">Bana Bas 💕</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Surprise Modal / Popup -->
+  <div id="surpriseModal" class="modal" aria-hidden="true" role="dialog">
+    <div class="modal__backdrop"></div>
+    <div class="modal__content glass-card">
+      <button id="modalCloseBtn" class="modal__close-btn" aria-label="Kapat">&times;</button>
+      <div class="modal__header">
+        <span class="modal__badge">✨ Sana Özel Not ✨</span>
+      </div>
+      <div class="modal__body">
+        <div class="modal__heart-animation">💖</div>
+        <blockquote id="surpriseQuoteText" class="modal__quote">
+          "Sen benim bu hayatta karşılaştığım en tatlı mucizesin..."
+        </blockquote>
+        <span id="surpriseQuoteSub" class="modal__quote-sub">- Seni Çok Seven Sevgilin</span>
+      </div>
+      <div class="modal__footer">
+        <button id="anotherQuoteBtn" class="btn btn--primary">Bir Not Daha Oku ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gallery Lightbox Modal -->
+  <div id="galleryModal" class="modal" aria-hidden="true" role="dialog">
+    <div class="modal__backdrop"></div>
+    <div class="modal__content modal__content--gallery glass-card">
+      <button id="galleryModalCloseBtn" class="modal__close-btn" aria-label="Kapat">&times;</button>
+      <div class="gallery-modal__wrapper">
+        <img id="galleryModalImg" src="" alt="Anı Fotoğrafı" class="gallery-modal__image">
+        <div class="gallery-modal__info">
+          <h3 id="galleryModalTitle" class="gallery-modal__title">Anı Başlığı</h3>
+          <p id="galleryModalDesc" class="gallery-modal__desc">Anı Açıklaması</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__container">
+      <p class="footer__text">
+        Sevgiyle ve senin için hazırlandı 💕 | <span>Seni Her Gün Daha Çok Seviyorum</span>
+      </p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
