@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGalleryModal();
   initConfettiEngine();
   initMusicButton();
-  initDateProposal();
+  // initDateProposal is handled in planner.js
   initComplaintBox();
 });
 
@@ -262,40 +262,81 @@ function animateConfetti(canvas, ctx) {
   }
 }
 
+/* ==========================================
+   ŞARKI LİSTESİ - Buraya kendi şarkılarını ekle!
+   1. MP3 dosyasını assets/music/ klasörüne kopyala
+   2. Aşağıya { title: "Şarkı Adı 🎵", url: "assets/music/dosyaadi.mp3" } ekle
+   ========================================== */
+const PLAYLIST = [
+  { title: "Şarkı 1 💕", url: "assets/music/sarki1.mp3" },
+  { title: "Şarkı 2 🌸", url: "assets/music/sarki2.mp3" },
+  { title: "Şarkı 3 ✨", url: "assets/music/sarki3.mp3" },
+];
+
 /* --- 5. Interactive Ambient Melody Playlist Player --- */
 function initMusicButton() {
   const toggleBtn = document.getElementById('musicToggleBtn');
   const nextBtn = document.getElementById('musicNextBtn');
   const trackInfo = document.getElementById('musicTrackInfo');
   const playerContainer = document.querySelector('.header__music-player');
+  const playlistBtn = document.getElementById('musicPlaylistBtn');
+  const playlistPanel = document.getElementById('musicPlaylistPanel');
+  const playlistItems = document.getElementById('musicPlaylistItems');
 
   if (!toggleBtn || !playerContainer) return;
-
-  const playlist = [
-    {
-      title: "Kisses 💋",
-      url: "https://assets.codepen.io/4358584/Anitek_-_01_-_Kisses.mp3"
-    },
-    {
-      title: "Sparkle ✨",
-      url: "https://assets.codepen.io/4358584/Anitek_-_02_-_Sparkle.mp3"
-    },
-    {
-      title: "Dawn 🌅",
-      url: "https://assets.codepen.io/4358584/Anitek_-_03_-_Dawn.mp3"
-    }
-  ];
 
   let currentTrackIndex = 0;
   let isPlaying = false;
   let audio = new Audio();
-  audio.volume = 0.4; // Set a soft volume by default
+  audio.volume = 0.4;
+
+  // Playlist panel: render items
+  function renderPlaylist() {
+    if (!playlistItems) return;
+    playlistItems.innerHTML = '';
+    PLAYLIST.forEach((track, index) => {
+      const li = document.createElement('li');
+      li.className = 'music-playlist-panel__item' + (index === currentTrackIndex ? ' active' : '');
+      li.dataset.index = index;
+      li.innerHTML = `
+        <span class="music-playlist-panel__item-icon">${index === currentTrackIndex && isPlaying ? '▶️' : '🎵'}</span>
+        <span class="music-playlist-panel__item-title">${track.title}</span>
+      `;
+      li.addEventListener('click', () => {
+        currentTrackIndex = index;
+        loadTrack(currentTrackIndex);
+        playMusic();
+        renderPlaylist();
+        closePlaylistPanel();
+      });
+      playlistItems.appendChild(li);
+    });
+  }
+
+  function openPlaylistPanel() {
+    if (!playlistPanel) return;
+    renderPlaylist();
+    playlistPanel.removeAttribute('hidden');
+  }
+
+  function closePlaylistPanel() {
+    if (playlistPanel) playlistPanel.setAttribute('hidden', '');
+  }
+
+  function togglePlaylistPanel() {
+    if (!playlistPanel) return;
+    if (playlistPanel.hasAttribute('hidden')) {
+      openPlaylistPanel();
+    } else {
+      closePlaylistPanel();
+    }
+  }
 
   function loadTrack(index) {
-    audio.src = playlist[index].url;
+    audio.src = PLAYLIST[index].url;
     audio.load();
     if (trackInfo) {
-      trackInfo.textContent = playlist[index].title;
+      trackInfo.textContent = PLAYLIST[index].title;
     }
   }
 
@@ -323,11 +364,10 @@ function initMusicButton() {
   }
 
   function nextTrack() {
-    currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+    currentTrackIndex = (currentTrackIndex + 1) % PLAYLIST.length;
     loadTrack(currentTrackIndex);
-    if (isPlaying) {
-      playMusic();
-    }
+    if (isPlaying) playMusic();
+    renderPlaylist();
   }
 
   toggleBtn.addEventListener('click', () => {
@@ -340,108 +380,77 @@ function initMusicButton() {
 
   if (nextBtn) {
     nextBtn.addEventListener('click', (e) => {
-      e.stopPropagation(); // Prevent main button click triggering if nested
+      e.stopPropagation();
       nextTrack();
     });
   }
 
-  // Handle song ending - auto play next
+  // Playlist button: open/close panel
+  if (playlistBtn) {
+    playlistBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePlaylistPanel();
+    });
+  }
+
+  // Track info: open panel on click
+  if (trackInfo) {
+    trackInfo.addEventListener('click', () => togglePlaylistPanel());
+    trackInfo.style.cursor = 'pointer';
+  }
+
+  // Close panel on click outside
+  document.addEventListener('click', (e) => {
+    if (playlistPanel && !playlistPanel.hasAttribute('hidden')) {
+      if (!playerContainer.contains(e.target)) {
+        closePlaylistPanel();
+      }
+    }
+  });
+
   audio.addEventListener('ended', () => {
     nextTrack();
     playMusic();
   });
 
-  // Handle loading errors gracefully
   audio.addEventListener('error', () => {
-    console.error("Müzik yükleme hatası. Sonraki şarkıya geçiliyor...");
+    console.warn("Şarkı yükleme hatası. Sonraki şarkıya geçiliyor...");
     nextTrack();
   });
+
+  // Load initial track
+  loadTrack(currentTrackIndex);
 }
 
-/* --- 6. Date Proposal & Selection System --- */
-function initDateProposal() {
-  const form = document.getElementById('dateProposalForm');
-  if (!form) return;
-
-  // Lütfen buraya kendi telefon numaranızı yazın (örn: '905321234567')
-  // Boş bırakılırsa WhatsApp, kullanıcının mesajı kime göndereceğini seçmesine izin verir.
-  const MY_PHONE_NUMBER = ''; 
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const dateVal = document.getElementById('proposalDate').value;
-    const timeVal = document.getElementById('proposalTime').value;
-    const activityVal = document.getElementById('proposalActivity').value;
-    const noteVal = document.getElementById('proposalNote').value;
-
-    // Format date to local standard DD.MM.YYYY
-    let formattedDate = dateVal;
-    if (dateVal) {
-      const parts = dateVal.split('-');
-      if (parts.length === 3) {
-        formattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`;
-      }
-    }
-
-    const message = `Aşkım, seninle harika bir plan yapalım mı? Buluşma Teklifim:
-📅 Tarih: ${formattedDate}
-⏰ Saat: ${timeVal}
-🎈 Aktivite: ${activityVal}
-💬 Not: ${noteVal || 'Yok (Sadece sen ol yeter 💕)'}
-
-Ne dersin? 🥰`;
-
-    const encodedMessage = encodeURIComponent(message);
-    let whatsappUrl = '';
-    
-    if (MY_PHONE_NUMBER) {
-      whatsappUrl = `https://api.whatsapp.com/send?phone=${MY_PHONE_NUMBER}&text=${encodedMessage}`;
-    } else {
-      whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
-    }
-
-    // Launch confetti and open WhatsApp
-    triggerConfettiExplosion();
-    setTimeout(() => {
-      window.open(whatsappUrl, '_blank');
-    }, 800);
-  });
-}
-
-/* --- 7. Complaint Box System --- */
+/* --- 7. Complaint Box System (Firebase Realtime DB) --- */
 function initComplaintBox() {
   const form = document.getElementById('complaintForm');
   const complaintsList = document.getElementById('complaintsList');
 
   if (!form || !complaintsList) return;
 
-  // Load from local storage
-  let complaints = JSON.parse(localStorage.getItem('complaints')) || [];
-
-  function saveComplaints() {
-    localStorage.setItem('complaints', JSON.stringify(complaints));
-  }
-
-  function renderComplaints() {
+  function renderComplaints(complaints) {
     complaintsList.innerHTML = '';
 
-    if (complaints.length === 0) {
+    if (!complaints || complaints.length === 0) {
       complaintsList.innerHTML = `<p class="complaints-list__empty">Henüz hiç şikayet yok, ne güzel! 🥰</p>`;
       return;
     }
 
-    // Sort by date (newest first)
-    const sortedComplaints = [...complaints].reverse();
+    // Sort by date (newest first — use id which is firebase timestamp)
+    const sortedComplaints = [...complaints].sort((a, b) => {
+      // Firebase push keys are lexicographically ordered by time
+      return b.id > a.id ? 1 : -1;
+    });
 
     sortedComplaints.forEach((c) => {
       const item = document.createElement('div');
       item.className = 'complaint-item';
-      
+
       const isPending = c.status === 'pending';
       const statusClass = isPending ? 'complaint-item__status--pending' : 'complaint-item__status--resolved';
       const statusText = isPending ? 'İncelemede 🔍' : 'Affedildi 💕';
-      
+
       let actionBtnHtml = '';
       if (isPending) {
         actionBtnHtml = `<button class="complaint-item__action-btn" data-id="${c.id}">Affet 💕</button>`;
@@ -462,28 +471,16 @@ function initComplaintBox() {
       complaintsList.appendChild(item);
     });
 
-    // Bind event listeners to resolve buttons
+    // Bind resolve buttons
     const actionBtns = complaintsList.querySelectorAll('.complaint-item__action-btn');
     actionBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
-        resolveComplaint(id);
+        dbUpdateComplaint(id, { status: 'resolved' });
+        // Firebase listener will auto-refresh the list
+        triggerConfettiExplosion();
       });
     });
-  }
-
-  function resolveComplaint(id) {
-    complaints = complaints.map(c => {
-      if (c.id === id) {
-        return { ...c, status: 'resolved' };
-      }
-      return c;
-    });
-    saveComplaints();
-    renderComplaints();
-    
-    // Celebratory confetti explosion for forgiveness!
-    triggerConfettiExplosion();
   }
 
   form.addEventListener('submit', (e) => {
@@ -496,24 +493,20 @@ function initComplaintBox() {
     const formattedDate = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
     const newComplaint = {
-      id: Date.now().toString(),
       type: typeVal,
       detail: detailVal,
       date: formattedDate,
       status: 'pending'
     };
 
-    complaints.push(newComplaint);
-    saveComplaints();
-    renderComplaints();
-
-    // Reset form
+    // Save to Firebase; listener auto-refreshes the list
+    dbAddComplaint(newComplaint);
     form.reset();
-
-    // Trigger sweet feedback confetti
     triggerConfettiExplosion();
   });
 
-  // Initial render
-  renderComplaints();
+  // Real-time listener: renders whenever Firebase data changes
+  dbListenComplaints((complaints) => {
+    renderComplaints(complaints);
+  });
 }

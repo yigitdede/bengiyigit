@@ -28,7 +28,7 @@
       </a>
       <div class="header__actions">
         <div class="header__music-player">
-          <span id="musicTrackInfo" class="header__music-info"></span>
+          <span id="musicTrackInfo" class="header__music-info" title="Şarkı listesi için tıkla"></span>
           <button id="musicToggleBtn" class="header__music-btn" aria-label="Müzik Aç/Kapat" title="Müziği Oynat/Duraklat">
             <span class="header__music-icon">🎵</span>
             <span class="header__music-label">Melodi</span>
@@ -36,6 +36,16 @@
           <button id="musicNextBtn" class="header__music-btn header__music-btn--next" aria-label="Sonraki Şarkı" title="Sonraki Şarkı" style="display: none;">
             <span class="header__music-icon">⏭️</span>
           </button>
+          <button id="musicPlaylistBtn" class="header__music-btn header__music-btn--playlist" aria-label="Şarkı Listesi" title="Şarkı seç">
+            <span class="header__music-icon">📋</span>
+          </button>
+          <!-- Music Playlist Dropdown Panel -->
+          <div id="musicPlaylistPanel" class="music-playlist-panel" hidden>
+            <div class="music-playlist-panel__header">🎵 Şarkı Listesi</div>
+            <ul id="musicPlaylistItems" class="music-playlist-panel__list">
+              <!-- JS tarafından doldurulur -->
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -189,6 +199,18 @@
           <p class="section-header__subtitle">Birlikte yeni planlar yapın veya tatlı sitemlerinizi paylaşın.</p>
         </div>
 
+        <!-- Upcoming Date Countdown Panel -->
+        <div id="upcomingDatePanel" class="upcoming-date-panel glass-card" style="display: none;">
+          <div class="upcoming-date-panel__content">
+            <span class="upcoming-date-panel__heart-icon">💖</span>
+            <div class="upcoming-date-panel__text-wrapper">
+              <h4 id="upcomingDateTitle" class="upcoming-date-panel__title">Yaklaşan Date Planımız!</h4>
+              <p id="upcomingDateCountdown" class="upcoming-date-panel__countdown">Date günümüze son 0 gün kaldı! 💕</p>
+              <span id="upcomingDateDetail" class="upcoming-date-panel__detail">Aktivite - Tarih - Saat</span>
+            </div>
+          </div>
+        </div>
+
         <div class="interactive__grid">
           <!-- Card 1: Date Proposal -->
           <article class="interactive-card glass-card">
@@ -220,8 +242,20 @@
                 <label for="proposalNote">Eklemek İstediğin Not</label>
                 <textarea id="proposalNote" placeholder="Sürpriz bir istek veya tatlı bir not yaz..." rows="2"></textarea>
               </div>
-              <button type="submit" class="btn btn--primary btn--full">Teklifi WhatsApp ile İlet 💖</button>
+              <div class="form-buttons-group">
+                <button type="button" id="saveDateBtn" class="btn btn--secondary btn--full">Sadece Planı Kaydet 💾</button>
+                <button type="submit" class="btn btn--primary btn--full">Kaydet & WhatsApp ile İlet 💖</button>
+              </div>
             </form>
+
+            <!-- Saved Dates Archive -->
+            <div class="planner-archive">
+              <h4 class="planner-archive__title">Kaydedilmiş Planlarımız 📅</h4>
+              <div id="savedDatesList" class="planner-list">
+                <!-- Will be dynamically populated by JS -->
+                <p class="planner-list__empty">Henüz kaydedilmiş plan yok! 🥰</p>
+              </div>
+            </div>
           </article>
 
           <!-- Card 2: Complaint Box -->
@@ -333,7 +367,15 @@
     </div>
   </footer>
 
-  <!-- JavaScript -->
+  <!-- Firebase SDK (CDN Compat - Ücretsiz) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <!-- Firebase Yapılandırma & Yardımcılar -->
+  <script src="firebase.js"></script>
+
+  <!-- Uygulama Scriptleri -->
   <script src="script.js"></script>
+  <script src="planner.js"></script>
 </body>
 </html>
