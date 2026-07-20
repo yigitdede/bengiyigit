@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initConfettiEngine();
   // initDateProposal is handled in planner.js
   initComplaintBox();
+  initBirthdayCountdown();
 });
 
 /* --- 1. Floating Background Hearts Generator --- */
@@ -21,19 +22,19 @@ function initFloatingHearts() {
   function createHeart() {
     const heart = document.createElement('span');
     heart.classList.add('floating-heart');
-    
+
     // Pick random symbol
     heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
-    
+
     // Random position and size
     const randomLeft = Math.random() * 100;
     const randomSize = Math.random() * 0.8 + 0.8; // 0.8rem - 1.6rem
     const randomDuration = Math.random() * 4 + 6; // 6s - 10s
-    
+
     heart.style.left = `${randomLeft}vw`;
     heart.style.fontSize = `${randomSize}rem`;
     heart.style.animationDuration = `${randomDuration}s`;
-    
+
     container.appendChild(heart);
 
     // Remove element after animation finishes
@@ -75,7 +76,7 @@ function getRandomLoveNote() {
   do {
     randomIndex = Math.floor(Math.random() * currentList.length);
   } while (randomIndex === lastNoteIndex && currentList.length > 1);
-  
+
   lastNoteIndex = randomIndex;
   return currentList[randomIndex];
 }
@@ -98,7 +99,20 @@ function initSurpriseButton() {
       } else {
         activeLoveNotes = [...defaultSweetQuotes];
       }
+
+      // Site her açıldığında veya yenilendiğinde bu koleksiyondan rastgele bir not çekip ekrana bassın
+      if (!window.hasLoadedInitialLoveNote) {
+        window.hasLoadedInitialLoveNote = true;
+        displayRandomLoveNoteOnLoad();
+      }
     });
+  }
+
+  function displayRandomLoveNoteOnLoad() {
+    const loveNoteEl = document.getElementById('surpriseLoveNote');
+    if (loveNoteEl) {
+      loveNoteEl.textContent = `"${getRandomLoveNote()}"`;
+    }
   }
 
   function showSurprise() {
@@ -106,7 +120,7 @@ function initSurpriseButton() {
     if (surpriseQuoteText) {
       surpriseQuoteText.textContent = `"${getRandomLoveNote()}"`;
     }
-    
+
     // Show modal
     surpriseModal.classList.add('active');
     surpriseModal.setAttribute('aria-hidden', 'false');
@@ -121,7 +135,7 @@ function initSurpriseButton() {
   }
 
   surpriseBtn.addEventListener('click', showSurprise);
-  
+
   if (modalCloseBtn) modalCloseBtn.addEventListener('click', hideSurprise);
   if (backdrop) backdrop.addEventListener('click', hideSurprise);
 
@@ -196,7 +210,7 @@ function initConfettiEngine() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   }
-  
+
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 }
@@ -279,6 +293,12 @@ function animateConfetti(canvas, ctx) {
 }
 
 /* --- 5. Complaint Box System (Firebase Realtime DB) --- */
+const COMPLAINT_STATUS = {
+  PENDING: 'pending',
+  UNDER_REVIEW: 'under_review',
+  RESOLVED: 'resolved'
+};
+
 function initComplaintBox() {
   const form = document.getElementById('complaintForm');
   const complaintsList = document.getElementById('complaintsList');
@@ -302,13 +322,42 @@ function initComplaintBox() {
       const item = document.createElement('div');
       item.className = 'complaint-item';
 
-      const isPending = c.status === 'pending';
-      const statusClass = isPending ? 'complaint-item__status--pending' : 'complaint-item__status--resolved';
-      const statusText = isPending ? 'İncelemede 🔍' : 'Affedildi 💕';
+      let statusClass = 'complaint-item__status--pending';
+      let statusText = 'Savunma Bekliyor ⏳';
+      if (c.status === COMPLAINT_STATUS.UNDER_REVIEW) {
+        statusClass = 'complaint-item__status--under-review';
+        statusText = 'İncelemede 🔍';
+      } else if (c.status === COMPLAINT_STATUS.RESOLVED) {
+        statusClass = 'complaint-item__status--resolved';
+        statusText = 'Affedildi 💕';
+      }
 
       let actionBtnHtml = '';
-      if (isPending) {
+      if (c.status !== COMPLAINT_STATUS.RESOLVED) {
         actionBtnHtml = `<button class="complaint-item__action-btn" data-id="${c.id}">Affet 💕</button>`;
+      }
+
+      let rightSideHtml = '';
+      if (c.status === COMPLAINT_STATUS.PENDING) {
+        rightSideHtml = `
+          <div class="complaint-item__defense-form">
+            <textarea class="complaint-item__defense-input" placeholder="Tatlı bir savunma yaz..." data-id="${c.id}"></textarea>
+            <button class="complaint-item__defense-submit-btn" data-id="${c.id}">Savun 🚀</button>
+          </div>
+        `;
+      } else if (c.status === COMPLAINT_STATUS.UNDER_REVIEW) {
+        rightSideHtml = `
+          <div class="complaint-item__defense-container">
+            <span class="complaint-item__defense-text"><strong>Savunma:</strong> ${c.defense || ''}</span>
+            <span class="complaint-item__status-badge complaint-item__status-badge--under-review">İncelemede 🔍</span>
+          </div>
+        `;
+      } else if (c.status === COMPLAINT_STATUS.RESOLVED) {
+        rightSideHtml = `
+          <div class="complaint-item__defense-container">
+            <span class="complaint-item__defense-text"><strong>Savunma:</strong> ${c.defense || 'Savunma yapılmadan affedildi 🌸'}</span>
+          </div>
+        `;
       }
 
       item.innerHTML = `
@@ -316,7 +365,14 @@ function initComplaintBox() {
           <span class="complaint-item__title">${c.type}</span>
           <span class="complaint-item__date">${c.date}</span>
         </div>
-        <p class="complaint-item__text">${c.detail}</p>
+        <div class="complaint-item__body">
+          <div class="complaint-item__left">
+            <p class="complaint-item__text">${c.detail}</p>
+          </div>
+          <div class="complaint-item__right">
+            ${rightSideHtml}
+          </div>
+        </div>
         <div class="complaint-item__footer">
           <span class="complaint-item__status ${statusClass}">${statusText}</span>
           ${actionBtnHtml}
@@ -332,7 +388,26 @@ function initComplaintBox() {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
         if (typeof dbUpdateComplaint === 'function') {
-          dbUpdateComplaint(id, { status: 'resolved' });
+          dbUpdateComplaint(id, { status: COMPLAINT_STATUS.RESOLVED });
+        }
+        triggerConfettiExplosion();
+      });
+    });
+
+    // Bind defense submit buttons
+    const defenseSubmitBtns = complaintsList.querySelectorAll('.complaint-item__defense-submit-btn');
+    defenseSubmitBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const textarea = complaintsList.querySelector(`textarea[data-id="${id}"]`);
+        const defenseText = textarea ? textarea.value.trim() : '';
+        if (!defenseText) return;
+
+        if (typeof dbUpdateComplaint === 'function') {
+          dbUpdateComplaint(id, {
+            defense: defenseText,
+            status: COMPLAINT_STATUS.UNDER_REVIEW
+          });
         }
         triggerConfettiExplosion();
       });
@@ -352,7 +427,7 @@ function initComplaintBox() {
       type: typeVal,
       detail: detailVal,
       date: formattedDate,
-      status: 'pending'
+      status: COMPLAINT_STATUS.PENDING
     };
 
     if (typeof dbAddComplaint === 'function') {
@@ -368,4 +443,186 @@ function initComplaintBox() {
       renderComplaints(complaints);
     });
   }
+}
+
+/* --- 6. Birthday Countdown & Celebration System --- */
+// Orijinal Doğum Günü Zaman Ayarları (21 Temmuz 00:00)
+const TARGET_BIRTHDAY_TIME = new Date('2026-07-21T00:00:00+03:00').getTime();
+const END_BIRTHDAY_TIME = TARGET_BIRTHDAY_TIME + (24 * 60 * 60 * 1000);
+
+function initBirthdayCountdown() {
+  const countdownDays = document.getElementById('countdownDays');
+  const countdownHours = document.getElementById('countdownHours');
+  const countdownMinutes = document.getElementById('countdownMinutes');
+  const countdownSeconds = document.getElementById('countdownSeconds');
+  const countdownCard = document.getElementById('birthdayCountdownCard');
+
+  if (!countdownCard) return;
+
+  let countdownInterval = null;
+
+  function checkTimeAndTrigger() {
+    const now = Date.now();
+
+    // 21 Temmuz günü boyunca (hedef zamandan sonraki 24 saat boyunca)
+    if (now >= TARGET_BIRTHDAY_TIME && now <= END_BIRTHDAY_TIME) {
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      // Geri sayım alanını tebrik mesajına dönüştür
+      countdownCard.innerHTML = `
+        <div class="birthday-celebration-text">
+          İyi ki doğdun Aşkımm, nice beraber musmutlu yıllaraa! ❤️🎂🎉❤️
+        </div>
+      `;
+
+      // Balonları uçur ve modalı aç
+      if (!window.isBirthdayCelebrated) {
+        window.isBirthdayCelebrated = true;
+        triggerBirthdayCelebration();
+      }
+      return true;
+    } else if (now > END_BIRTHDAY_TIME) {
+      // Doğum günü üzerinden 24 saat geçmişse sayacı kapat
+      if (countdownInterval) clearInterval(countdownInterval);
+      countdownCard.innerHTML = `
+        <div class="birthday-celebration-text" style="color: var(--text-muted); font-size: 0.9rem;">
+          Birlikte nice güzel yaşlara sevgilim... 💕
+        </div>
+      `;
+      return true;
+    }
+    return false;
+  }
+
+  // İlk kontrol
+  const isTriggered = checkTimeAndTrigger();
+  if (isTriggered) return;
+
+  // Saniye saniye güncelleme
+  countdownInterval = setInterval(() => {
+    const now = Date.now();
+    const difference = TARGET_BIRTHDAY_TIME - now;
+
+    if (difference <= 0) {
+      clearInterval(countdownInterval);
+      checkTimeAndTrigger();
+      return;
+    }
+
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+    if (countdownDays) countdownDays.textContent = String(days).padStart(2, '0');
+    if (countdownHours) countdownHours.textContent = String(hours).padStart(2, '0');
+    if (countdownMinutes) countdownMinutes.textContent = String(minutes).padStart(2, '0');
+    if (countdownSeconds) countdownSeconds.textContent = String(seconds).padStart(2, '0');
+  }, 1000);
+}
+
+function triggerBirthdayCelebration() {
+  const birthdayModal = document.getElementById('birthdayModal');
+  if (!birthdayModal) return;
+
+  // Modalı göster
+  birthdayModal.classList.add('active');
+  birthdayModal.setAttribute('aria-hidden', 'false');
+
+  // Balonları uçurmaya başla
+  startBirthdayBalloons();
+
+  // Konfeti patlaması
+  triggerConfettiExplosion();
+  setTimeout(triggerConfettiExplosion, 500);
+  setTimeout(triggerConfettiExplosion, 1200);
+
+  // Kapatma eventlerini bağla
+  const closeBtn = document.getElementById('birthdayModalCloseBtn');
+  const celebrateBtn = document.getElementById('birthdayCelebrateBtn');
+  const backdrop = birthdayModal.querySelector('.modal__backdrop');
+
+  function closeBirthdayModal() {
+    birthdayModal.classList.remove('active');
+    birthdayModal.setAttribute('aria-hidden', 'true');
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeBirthdayModal);
+  if (celebrateBtn) celebrateBtn.addEventListener('click', () => {
+    closeBirthdayModal();
+    triggerConfettiExplosion();
+    setTimeout(triggerConfettiExplosion, 400);
+  });
+  if (backdrop) backdrop.addEventListener('click', closeBirthdayModal);
+}
+
+function startBirthdayBalloons() {
+  let container = document.getElementById('birthdayBalloonContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'birthdayBalloonContainer';
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100vw';
+    container.style.height = '100vh';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '9998';
+    container.style.overflow = 'hidden';
+    document.body.appendChild(container);
+  }
+
+  const pastelColors = [
+    '#FFB7B2', // Pink
+    '#FFDAC1', // Peach
+    '#E2F0CB', // Yellow
+    '#B5C99A', // Sage
+    '#BFFCC6', // Mint
+    '#C7CEEA', // Blue
+    '#E8DFF5', // Lavender
+    '#FFD1DC'  // Rose
+  ];
+
+  function createBalloon() {
+    const balloon = document.createElement('div');
+    balloon.className = 'birthday-balloon';
+
+    const randomColor = pastelColors[Math.floor(Math.random() * pastelColors.length)];
+    balloon.style.backgroundColor = randomColor;
+
+    const randomLeft = Math.random() * 90 + 5; // 5vw - 95vw
+    balloon.style.left = `${randomLeft}vw`;
+
+    const randomScale = Math.random() * 0.4 + 0.8; // 0.8 - 1.2
+    balloon.style.transform = `scale(${randomScale})`;
+
+    const randomDuration = Math.random() * 3 + 5; // 5s - 8s
+    balloon.style.animationDuration = `${randomDuration}s`;
+
+    const stringEl = document.createElement('div');
+    stringEl.className = 'birthday-balloon__string';
+    balloon.appendChild(stringEl);
+
+    container.appendChild(balloon);
+
+    setTimeout(() => {
+      balloon.remove();
+    }, randomDuration * 1000);
+  }
+
+  // Başlangıçta toplu balon uçur
+  for (let i = 0; i < 20; i++) {
+    setTimeout(createBalloon, Math.random() * 2500);
+  }
+
+  // 30 saniye boyunca her 400ms'de bir yeni balon uçur
+  const balloonInterval = setInterval(() => {
+    if (container.children.length < 35) {
+      createBalloon();
+    }
+  }, 400);
+
+  setTimeout(() => {
+    clearInterval(balloonInterval);
+  }, 30000);
 }

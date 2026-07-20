@@ -1191,3 +1191,366 @@ body {
     gap: 1rem;
   }
 }
+
+/* --- New Birthday Countdown & CSS Balloons & Savunma Bakanlığı Styles --- */
+
+/* Hero Image & Countdown Container */
+.hero__image-and-countdown {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  width: 100%;
+}
+
+.hero__countdown {
+  padding: 1.5rem;
+  max-width: 320px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.hero__countdown-title {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.5px;
+}
+
+.hero__countdown-timer {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+}
+
+.countdown-unit-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(232, 165, 152, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem;
+  min-width: 58px;
+  box-shadow: 0 4px 10px rgba(220, 180, 180, 0.05);
+}
+
+.countdown-num {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent-rose);
+  line-height: 1;
+}
+
+.countdown-label {
+  font-size: 0.7rem;
+  color: var(--text-light);
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.hero__countdown-msg {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Birthday Celebration Message style */
+.birthday-celebration-text {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-rose);
+  line-height: 1.5;
+  animation: pulseGlow 2s infinite alternate ease-in-out;
+  padding: 1rem;
+}
+
+/* Surprise Love Note Box */
+.surprise__love-note-box {
+  background: rgba(255, 240, 243, 0.7);
+  border: 1.5px dashed var(--accent-pink);
+  border-radius: var(--radius-md);
+  padding: 1.2rem 1.5rem;
+  margin: 0.5rem 0 1.2rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 6px 15px rgba(255, 183, 178, 0.1);
+  text-align: center;
+  transition: transform var(--transition-fast);
+}
+
+.surprise__love-note-box:hover {
+  transform: scale(1.02);
+}
+
+.surprise__love-note-heart {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-rose);
+  background: rgba(232, 165, 152, 0.12);
+  padding: 0.2rem 0.8rem;
+  border-radius: var(--radius-full);
+  margin-bottom: 0.6rem;
+}
+
+.surprise__love-note-text {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Birthday Modal Styles */
+.modal__content--birthday {
+  max-width: 500px;
+  background: radial-gradient(circle at top left, var(--bg-secondary) 0%, var(--accent-cream) 100%);
+  border: 2px solid var(--accent-pink);
+}
+
+.birthday-modal__header {
+  margin-bottom: 1rem;
+}
+
+.birthday-modal__badge {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-rose);
+  background: rgba(232, 165, 152, 0.15);
+  padding: 0.35rem 1.2rem;
+  border-radius: var(--radius-full);
+}
+
+.birthday-modal__balloons-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  animation: heartbeat 1.5s infinite ease-in-out;
+}
+
+.birthday-modal__title {
+  font-family: var(--font-title);
+  font-size: 1.8rem;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+}
+
+.birthday-modal__text {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.birthday-modal__signature {
+  text-align: right;
+  font-family: var(--font-handwriting);
+  font-size: 2.2rem;
+  color: var(--accent-rose);
+  margin-top: 1rem;
+}
+
+.birthday-modal__footer {
+  margin-top: 1.5rem;
+}
+
+/* CSS Balloons */
+.birthday-balloon {
+  position: fixed;
+  bottom: -120px;
+  width: 55px;
+  height: 70px;
+  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  pointer-events: none;
+  z-index: 9999;
+  animation: floatBalloon 6s ease-in forwards;
+  box-shadow: inset -6px -10px 12px rgba(0, 0, 0, 0.08), 0 5px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Knot of the balloon */
+.birthday-balloon::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: calc(50% - 6px);
+  width: 12px;
+  height: 8px;
+  background-color: inherit;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.birthday-balloon__string {
+  position: absolute;
+  bottom: -32px;
+  left: calc(50% - 1px);
+  width: 1.5px;
+  height: 28px;
+  background-color: rgba(61, 52, 52, 0.2);
+}
+
+@keyframes floatBalloon {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.95;
+  }
+  90% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(-130vh) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+/* --- Complaint Defense Layout / Savunma Bakanlığı --- */
+.complaint-item__body {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.4rem;
+  border-top: 1px solid rgba(232, 165, 152, 0.15);
+  padding-top: 0.6rem;
+}
+
+.complaint-item__left {
+  flex: 1;
+}
+
+.complaint-item__right {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px dashed rgba(232, 165, 152, 0.25);
+  padding-left: 0.8rem;
+}
+
+/* Defense Form */
+.complaint-item__defense-form {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  width: 100%;
+}
+
+.complaint-item__defense-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(232, 165, 152, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.6rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--text-main);
+  outline: none;
+  resize: none;
+  transition: all var(--transition-fast);
+  height: 38px;
+}
+
+.complaint-item__defense-input:focus {
+  border-color: var(--accent-rose);
+  background: var(--accent-cream);
+  box-shadow: 0 0 0 2px rgba(232, 165, 152, 0.12);
+}
+
+.complaint-item__defense-submit-btn {
+  background: var(--text-main);
+  color: #FFF;
+  border: none;
+  font-family: var(--font-title);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.complaint-item__defense-submit-btn:hover {
+  background: var(--accent-rose);
+  transform: translateY(-1px);
+}
+
+/* Defense container for review and resolved */
+.complaint-item__defense-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.complaint-item__defense-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.complaint-item__status-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.complaint-item__status-badge--under-review {
+  background: rgba(216, 180, 226, 0.2);
+  color: var(--accent-lavender);
+}
+
+.complaint-item__status--under-review {
+  background: rgba(216, 180, 226, 0.2);
+  color: var(--accent-lavender);
+}
+
+/* Responsive adjustments for new elements */
+@media (max-width: 768px) {
+  .hero__image-and-countdown {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .complaint-item__body {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .complaint-item__right {
+    border-left: none;
+    border-top: 1px dashed rgba(232, 165, 152, 0.25);
+    padding-left: 0;
+    padding-top: 0.8rem;
+    flex: none;
+    width: 100%;
+  }
+}

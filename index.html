@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Seninle geçen her an çok değerli! İkimiz için özel anı ve sürpriz websitesi.">
   <title>İkimizin Hikayesi 💕 | Seninle Geçen Her An Çok Değerli</title>
-  
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=Sacramento&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=Sacramento&display=swap"
+    rel="stylesheet">
+
   <!-- CSS Style -->
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <!-- Floating Heart Background Particles -->
@@ -38,19 +42,45 @@
     <section id="hero" class="hero">
       <div class="hero__container">
         <div class="hero__card glass-card">
-          <div class="hero__image-wrapper">
-            <div class="hero__image-frame">
-              <img id="heroImage" src="assets/images/hero.jpg" alt="İkimizin Fotoğrafı" class="hero__image">
+          <div class="hero__image-and-countdown">
+            <div class="hero__image-wrapper">
+              <div class="hero__image-frame">
+                <img id="heroImage" src="assets/images/hero.jpg" alt="İkimizin Fotoğrafı" class="hero__image">
+              </div>
+              <div class="hero__badge">
+                <span>💖 Sonsuza Dek</span>
+              </div>
             </div>
-            <div class="hero__badge">
-              <span>💖 Sonsuza Dek</span>
+
+            <!-- Birthday Countdown Section -->
+            <div class="hero__countdown glass-card" id="birthdayCountdownCard">
+              <h3 class="hero__countdown-title">🎂 Geri Sayım</h3>
+              <div class="hero__countdown-timer" id="birthdayCountdown">
+                <div class="countdown-unit-box">
+                  <span id="countdownDays" class="countdown-num">00</span>
+                  <span class="countdown-label">Gün</span>
+                </div>
+                <div class="countdown-unit-box">
+                  <span id="countdownHours" class="countdown-num">00</span>
+                  <span class="countdown-label">Saat</span>
+                </div>
+                <div class="countdown-unit-box">
+                  <span id="countdownMinutes" class="countdown-num">00</span>
+                  <span class="countdown-label">Dk</span>
+                </div>
+                <div class="countdown-unit-box">
+                  <span id="countdownSeconds" class="countdown-num">00</span>
+                  <span class="countdown-label">Sn</span>
+                </div>
+              </div>
+              <p class="hero__countdown-msg" id="countdownMessage">Doğum gününe kalan süre...</p>
             </div>
           </div>
-          
+
           <div class="hero__content">
             <h1 class="hero__title">Seninle geçen her an çok değerli ✨</h1>
             <p class="hero__subtitle">
-              Hayatıma kattığın tüm güzellikler, gülücükler ve tatlı anılar için teşekkür ederim. 
+              Hayatıma kattığın tüm güzellikler, gülücükler ve tatlı anılar için teşekkür ederim.
               Bu sayfa, seninle paylaştığımız en özel anların küçük bir hediyesi.
             </p>
             <div class="hero__tags">
@@ -69,14 +99,16 @@
         <div class="section-header">
           <span class="section-header__tag">📸 Tatlı Anılarımız</span>
           <h2 class="section-header__title">Unutulmaz Anlar Galerisi</h2>
-          <p class="section-header__subtitle">Fotoğrafların üzerine gelerek detayları görebilir, tıklayarak anıyı büyütebilirsin.</p>
+          <p class="section-header__subtitle">Fotoğrafların üzerine gelerek detayları görebilir, tıklayarak anıyı
+            büyütebilirsin.</p>
         </div>
 
         <div class="gallery__grid">
           <!-- Memory 1 -->
           <article class="gallery-card glass-card" data-memory-id="1">
             <div class="gallery-card__image-wrapper">
-              <img src="assets/images/memory1.jpg" alt="Birlikte İlk Günümüz" class="gallery-card__image" loading="lazy">
+              <img src="assets/images/memory1.jpg" alt="Birlikte İlk Günümüz" class="gallery-card__image"
+                loading="lazy">
               <div class="gallery-card__overlay">
                 <span class="gallery-card__heart">❤️</span>
                 <span class="gallery-card__hover-text">Anıyı Gör</span>
@@ -85,7 +117,8 @@
             <div class="gallery-card__content">
               <span class="gallery-card__date">Anı #1</span>
               <h3 class="gallery-card__title">Göz Göze Geldiğimiz O Gün</h3>
-              <p class="gallery-card__desc">Kalp atışlarımın ilk defa seninle bu kadar hızlı attığını hissettiğim an...</p>
+              <p class="gallery-card__desc">Kalp atışlarımın ilk defa seninle bu kadar hızlı attığını hissettiğim an...
+              </p>
             </div>
           </article>
 
@@ -140,7 +173,8 @@
           <!-- Memory 5 -->
           <article class="gallery-card glass-card" data-memory-id="5">
             <div class="gallery-card__image-wrapper">
-              <img src="assets/images/memory5.jpg" alt="Unutulmaz Yolculuklar" class="gallery-card__image" loading="lazy">
+              <img src="assets/images/memory5.jpg" alt="Unutulmaz Yolculuklar" class="gallery-card__image"
+                loading="lazy">
               <div class="gallery-card__overlay">
                 <span class="gallery-card__heart">❤️</span>
                 <span class="gallery-card__hover-text">Anıyı Gör</span>
@@ -222,10 +256,12 @@
               </div>
               <div class="form-group">
                 <label for="proposalNote">Eklemek İstediğin Not</label>
-                <textarea id="proposalNote" placeholder="Sürpriz bir istek veya tatlı bir not yaz..." rows="2"></textarea>
+                <textarea id="proposalNote" placeholder="Sürpriz bir istek veya tatlı bir not yaz..."
+                  rows="2"></textarea>
               </div>
               <div class="form-buttons-group">
-                <button type="button" id="saveDateBtn" class="btn btn--secondary btn--full">Sadece Planı Kaydet 💾</button>
+                <button type="button" id="saveDateBtn" class="btn btn--secondary btn--full">Sadece Planı Kaydet
+                  💾</button>
                 <button type="submit" class="btn btn--primary btn--full">Kaydet & WhatsApp ile İlet 💖</button>
               </div>
             </form>
@@ -260,7 +296,8 @@
               </div>
               <div class="form-group">
                 <label for="complaintDetail">Şikayet Detayı</label>
-                <textarea id="complaintDetail" placeholder="İçini dök, ne yaptı bu çocuk yine..." rows="2" required></textarea>
+                <textarea id="complaintDetail" placeholder="İçini dök, ne yaptı bu çocuk yine..." rows="2"
+                  required></textarea>
               </div>
               <button type="submit" class="btn btn--primary btn--full">Şikayeti Gönder & Kaydet 😤</button>
             </form>
@@ -290,6 +327,12 @@
           <p class="surprise__subtitle">
             Aşağıdaki kalbe basarak senin için hazırladığım tatlı notları keşfet ve konfeti yağmurunu başlat!
           </p>
+
+          <!-- Love Note Display Area -->
+          <div class="surprise__love-note-box" id="loveNoteBox">
+            <span class="surprise__love-note-heart">🌸 Günün Notu 🌸</span>
+            <p id="surpriseLoveNote" class="surprise__love-note-text">Yükleniyor... 💕</p>
+          </div>
 
           <button id="surpriseBtn" class="surprise__button" aria-label="Sürpriz Notu Aç">
             <div class="surprise__button-pulse"></div>
@@ -337,6 +380,32 @@
     </div>
   </div>
 
+  <!-- Birthday Celebration Modal -->
+  <div id="birthdayModal" class="modal" aria-hidden="true" role="dialog">
+    <div class="modal__backdrop"></div>
+    <div class="modal__content modal__content--birthday glass-card">
+      <button id="birthdayModalCloseBtn" class="modal__close-btn" aria-label="Kapat">&times;</button>
+      <div class="birthday-modal__header">
+        <span class="birthday-modal__badge">✨ Mutlu Yıllar Aşkım! ✨</span>
+      </div>
+      <div class="birthday-modal__body">
+        <div class="birthday-modal__balloons-icon">🎈🎂🎉</div>
+        <h2 class="birthday-modal__title">İyi ki doğdun sevgilim...</h2>
+        <div class="birthday-modal__text">
+          <p>Hayatıma girdiğin o ilk günden beri dünyamı güzelleştiren,hayat kalitemi arttıran her anımı anlamlı kılan
+            ve yüzümü daima güldüren yavru kuşum...</p>
+          <p>Yeni yaşında tüm dileklerinin gerçek olmasını, yeni stajında başarılı olmanı,bütün güzelliklerin seni
+            bulmasını dilerim. Seninle birlikte daha nice mutlu, huzurlu ve eğlence dolu senelerimiz olsun. İyi ki
+            doğdun, iyi ki varsın, iyi ki benimsin!</p>
+          <p class="birthday-modal__signature">Seni Çok Seven Sevgilin 💕</p>
+        </div>
+      </div>
+      <div class="birthday-modal__footer">
+        <button id="birthdayCelebrateBtn" class="btn btn--primary">Sonsuza Kadar Beraber 💖</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Confetti Canvas -->
   <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
 
@@ -360,4 +429,5 @@
   <script src="script.js"></script>
   <script src="planner.js"></script>
 </body>
+
 </html>
