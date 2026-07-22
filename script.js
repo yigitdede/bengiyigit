@@ -108,17 +108,13 @@ function renderLoveNotesBoard(notes) {
   const listEl = document.getElementById('loveNotesList');
   if (!listEl) return;
 
-  // Sadece manuel yazılmış notları al (varsayılan yedek not metinlerini pano listesinden hariç tut)
-  const defaultTexts = defaultSweetQuotes.map(q => q.text);
-  const userCreatedNotes = (notes || []).filter(n => n && n.text && !defaultTexts.includes(n.text));
-
-  if (!userCreatedNotes || userCreatedNotes.length === 0) {
+  if (!notes || notes.length === 0) {
     listEl.innerHTML = `<p class="love-notes-list__empty">${EMPTY_LOVE_NOTES_MSG}</p>`;
     return;
   }
 
   // Yeni eklenen notlar en üstte görünecek şekilde sırala (timestamp'e göre)
-  const sortedNotes = [...userCreatedNotes].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  const sortedNotes = [...notes].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
   listEl.innerHTML = '';
   sortedNotes.forEach(n => {
@@ -160,8 +156,8 @@ function renderLoveNotesBoard(notes) {
       }
 
       setTimeout(() => {
-        if (typeof dbDeleteLoveNote === 'function') {
-          dbDeleteLoveNote(id);
+        if (typeof dbDeleteBoardNote === 'function') {
+          dbDeleteBoardNote(id);
         }
       }, 300);
     });
@@ -179,18 +175,16 @@ function initSurpriseButton() {
 
   if (!surpriseBtn || !surpriseModal) return;
 
-  // Firebase Realtime DB dinleyicisi: lovenotes düğümü değişince panoyu günceller
+  // Firebase Realtime DB dinleyicisi: Sadece lovenotes (sürpriz havuz) düğümünü dinler
   if (typeof dbListenLoveNotes === 'function') {
     dbListenLoveNotes((firebaseNotes) => {
       if (firebaseNotes && firebaseNotes.length > 0) {
         activeLoveNotes = firebaseNotes;
-        renderLoveNotesBoard(firebaseNotes);
       } else {
         activeLoveNotes = [...defaultSweetQuotes];
-        renderLoveNotesBoard([]);
       }
 
-      // İlk yüklenişte Günün Notu kartına rastgele not seç ve sabit tut
+      // İlk yüklenişte Günün Notu kartına sürpriz havuzundan not seç ve sabit tut
       if (!window.hasLoadedInitialLoveNote) {
         window.hasLoadedInitialLoveNote = true;
         displayRandomLoveNoteOnLoad();
@@ -243,10 +237,18 @@ function initSurpriseButton() {
   });
 }
 
-/* --- 2.5 Inline Love Note Submitting System --- */
+/* --- 2.5 Inline Love Note Submitting System (shared_board_notes) --- */
 function initInlineLoveNoteForm() {
   const form = document.getElementById('inlineAddNoteForm');
   const toastMsg = document.getElementById('inlineAddNoteSuccess');
+
+  // Firebase Realtime DB dinleyicisi: Sadece shared_board_notes (ortak aşk panosu) düğümünü dinler
+  if (typeof dbListenBoardNotes === 'function') {
+    dbListenBoardNotes((boardNotes) => {
+      renderLoveNotesBoard(boardNotes);
+    });
+  }
+
   if (!form) return;
 
   form.addEventListener('submit', (e) => {
@@ -266,8 +268,8 @@ function initInlineLoveNoteForm() {
       timestamp: Date.now()
     };
 
-    if (typeof dbAddLoveNote === 'function') {
-      dbAddLoveNote(noteData);
+    if (typeof dbAddBoardNote === 'function') {
+      dbAddBoardNote(noteData);
     }
 
     form.reset();

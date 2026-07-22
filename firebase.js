@@ -21,6 +21,7 @@ const db = firebase.database();
 const COMPLAINTS_PATH = 'complaints';
 const PLANS_PATH = 'datePlans';
 const LOVENOTES_PATH = 'lovenotes';
+const BOARDNOTES_PATH = 'shared_board_notes';
 
 /* ---- Şikayet (Complaints) Yardımcı Fonksiyonlar ---- */
 
@@ -90,15 +91,46 @@ const NOTE_AUTHORS = {
   YIGIT: 'Yiğit'
 };
 
-/* ---- Sevgi Notları (Love Notes) Yardımcı Fonksiyonlar ---- */
+/* ---- Sürpriz Notlar Havuzu (Love Notes) Yardımcı Fonksiyonlar ---- */
 
 /**
- * Firebase Realtime Database'deki lovenotes verilerini gerçek zamanlı dinler.
- * Eski string notlar ve yeni nesne notları { text, author, timestamp } formatına normalize eder.
- * @param {function} callback - [{ text, author, timestamp }] nesne dizisi ile çağrılır.
+ * Firebase Realtime Database'deki lovenotes (sürpriz notlar havuzu) verilerini dinler.
+ * @param {function} callback - [{ id, text, author }] nesne dizisi ile çağrılır.
  */
 function dbListenLoveNotes(callback) {
   db.ref(LOVENOTES_PATH).on('value', (snapshot) => {
+    const raw = snapshot.val();
+    let notes = [];
+    if (raw) {
+      if (Array.isArray(raw)) {
+        notes = raw
+          .filter(n => Boolean(n))
+          .map((n, idx) => typeof n === 'string' ? { id: String(idx), text: n, author: NOTE_AUTHORS.YIGIT } : { id: n.id || String(idx), text: n.text || '', author: n.author || NOTE_AUTHORS.YIGIT });
+      } else if (typeof raw === 'object') {
+        notes = Object.entries(raw).map(([key, val]) => {
+          if (typeof val === 'string') {
+            return { id: key, text: val, author: NOTE_AUTHORS.YIGIT };
+          }
+          return {
+            id: key,
+            text: val.text || val.note || '',
+            author: val.author || NOTE_AUTHORS.YIGIT
+          };
+        });
+      }
+    }
+    callback(notes);
+  });
+}
+
+/* ---- Canlı Ortak Aşk Panosu (shared_board_notes) Yardımcı Fonksiyonlar ---- */
+
+/**
+ * Realtime Database'deki shared_board_notes (ortak aşk panosu) verilerini gerçek zamanlı dinler.
+ * @param {function} callback - [{ id, text, author, timestamp }] nesne dizisi ile çağrılır.
+ */
+function dbListenBoardNotes(callback) {
+  db.ref(BOARDNOTES_PATH).on('value', (snapshot) => {
     const raw = snapshot.val();
     let notes = [];
     if (raw) {
@@ -125,19 +157,19 @@ function dbListenLoveNotes(callback) {
 }
 
 /**
- * Yeni sevgi notu ekler. Firebase push key otomatik ID olarak kullanılır.
+ * Ortak aşk panosuna (shared_board_notes) yeni not ekler.
  * @param {object} noteData - { text, author, timestamp }
  */
-function dbAddLoveNote(noteData) {
-  const newRef = db.ref(LOVENOTES_PATH).push();
+function dbAddBoardNote(noteData) {
+  const newRef = db.ref(BOARDNOTES_PATH).push();
   return newRef.set(noteData);
 }
 
 /**
- * Sevgi notunu Firebase'den siler.
+ * Ortak aşk panosundan (shared_board_notes) not siler.
  * @param {string} id - Firebase push key.
  */
-function dbDeleteLoveNote(id) {
+function dbDeleteBoardNote(id) {
   if (!id) return;
-  return db.ref(`${LOVENOTES_PATH}/${id}`).remove();
+  return db.ref(`${BOARDNOTES_PATH}/${id}`).remove();
 }
