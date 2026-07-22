@@ -146,7 +146,7 @@ function initSurpriseButton() {
 
   if (!surpriseBtn || !surpriseModal) return;
 
-  // Firebase Realtime DB dinleyicisi: lovenotes düğümü değişince otomatik hem kartı hem panoyu günceller
+  // Firebase Realtime DB dinleyicisi: lovenotes düğümü değişince panoyu günceller
   if (typeof dbListenLoveNotes === 'function') {
     dbListenLoveNotes((firebaseNotes) => {
       if (firebaseNotes && firebaseNotes.length > 0) {
@@ -157,16 +157,18 @@ function initSurpriseButton() {
         renderLoveNotesBoard([]);
       }
 
-      // Her yeni veri geldiğinde günün notu kartını güncelle
-      displayRandomLoveNoteOnLoad();
+      // İlk yüklenişte Günün Notu kartına rastgele not seç ve sabit tut
+      if (!window.hasLoadedInitialLoveNote) {
+        window.hasLoadedInitialLoveNote = true;
+        displayRandomLoveNoteOnLoad();
+      }
     });
   }
 
   function displayRandomLoveNoteOnLoad() {
     const loveNoteEl = document.getElementById('surpriseLoveNote');
     const loveNoteAuthorEl = document.getElementById('surpriseLoveNoteAuthor');
-    // Eğer veritabanında not varsa en son eklenen notu veya rastgele notu göster
-    const note = activeLoveNotes.length > 0 ? activeLoveNotes[activeLoveNotes.length - 1] : getRandomLoveNote();
+    const note = getRandomLoveNote();
     renderNoteDisplay(note, loveNoteEl, loveNoteAuthorEl);
   }
 

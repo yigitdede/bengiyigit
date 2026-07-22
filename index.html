@@ -318,28 +318,42 @@
     <!-- Surprise Section -->
     <section id="surprise" class="surprise-section">
       <div class="surprise__container">
-        <div class="surprise__card glass-card">
-          <div class="surprise__icon-wrapper">
-            <span class="surprise__floating-sparkle">✨</span>
-            <span class="surprise__floating-sparkle">💖</span>
-          </div>
-          <h2 class="surprise__title">Küçük Bir Sürpriz Zamanı! 🎁</h2>
-          <p class="surprise__subtitle">
-            Aşağıdaki kalbe basarak senin için hazırladığım tatlı notları keşfet ve konfeti yağmurunu başlat!
-          </p>
+        <!-- Top 2-Column Grid: Left (Surprise Card), Right (Notes Board) -->
+        <div class="surprise__top-grid">
+          <div class="surprise__card glass-card">
+            <div class="surprise__icon-wrapper">
+              <span class="surprise__floating-sparkle">✨</span>
+              <span class="surprise__floating-sparkle">💖</span>
+            </div>
+            <h2 class="surprise__title">Küçük Bir Sürpriz Zamanı! 🎁</h2>
+            <p class="surprise__subtitle">
+              Aşağıdaki kalbe basarak senin için hazırladığımız tatlı notları keşfet ve konfeti yağmurunu başlat!
+            </p>
 
-          <!-- Love Note Display Area -->
-          <div class="surprise__love-note-box" id="loveNoteBox">
-            <span class="surprise__love-note-heart">🌸 Günün Notu 🌸</span>
-            <p id="surpriseLoveNote" class="surprise__love-note-text">Yükleniyor... 💕</p>
-            <div id="surpriseLoveNoteAuthor" class="love-note-author-badge love-note-author-badge--yigit">— Yiğit 💙</div>
+            <!-- Love Note Display Area -->
+            <div class="surprise__love-note-box" id="loveNoteBox">
+              <span class="surprise__love-note-heart">🌸 Günün Notu 🌸</span>
+              <p id="surpriseLoveNote" class="surprise__love-note-text">Yükleniyor... 💕</p>
+              <div id="surpriseLoveNoteAuthor" class="love-note-author-badge love-note-author-badge--yigit">— Yiğit 💙</div>
+            </div>
+
+            <button id="surpriseBtn" class="surprise__button" aria-label="Sürpriz Notu Aç">
+              <div class="surprise__button-pulse"></div>
+              <span class="surprise__button-icon">💖</span>
+              <span class="surprise__button-text">Bana Bas 💕</span>
+            </button>
           </div>
 
-          <button id="surpriseBtn" class="surprise__button" aria-label="Sürpriz Notu Aç">
-            <div class="surprise__button-pulse"></div>
-            <span class="surprise__button-icon">💖</span>
-            <span class="surprise__button-text">Bana Bas 💕</span>
-          </button>
+          <!-- Side-by-side Love Notes Board Archive / List -->
+          <div class="surprise__board-card glass-card">
+            <div class="surprise__board-header">
+              <span class="surprise__board-icon">💌</span>
+              <h3 class="surprise__board-title">Sevgi Notları Panomuz 💖</h3>
+            </div>
+            <div id="loveNotesList" class="love-notes-list">
+              <p class="love-notes-list__empty">Henüz pano notu bulunmuyor! İlk notu sen yaz sevgilim 💕</p>
+            </div>
+          </div>
         </div>
 
         <!-- Inline Love Note Submitting Card -->
@@ -379,17 +393,6 @@
               <button type="submit" class="btn btn--primary btn--submit-note">Notu Gönder 💌</button>
             </div>
           </form>
-        </div>
-
-        <!-- Love Notes Board Archive / List -->
-        <div class="surprise__board-card glass-card">
-          <div class="surprise__board-header">
-            <span class="surprise__board-icon">💌</span>
-            <h3 class="surprise__board-title">Aşk Panomuzdaki Notlar 💖</h3>
-          </div>
-          <div id="loveNotesList" class="love-notes-list">
-            <p class="love-notes-list__empty">Henüz pano notu bulunmuyor! İlk notu sen yaz sevgilim 💕</p>
-          </div>
         </div>
       </div>
     </section>

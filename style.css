@@ -1723,11 +1723,21 @@ body {
   min-width: 180px;
 }
 
+/* 2-Column Side-by-side Top Grid for Surprise & Love Notes Board */
+.surprise__top-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  align-items: stretch;
+}
+
 /* Love Notes List / Board Archive */
 .surprise__board-card {
-  margin-top: 2rem;
   padding: 2rem;
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .surprise__board-header {
