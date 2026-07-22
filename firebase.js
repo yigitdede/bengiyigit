@@ -105,13 +105,14 @@ function dbListenLoveNotes(callback) {
       if (Array.isArray(raw)) {
         notes = raw
           .filter(n => Boolean(n))
-          .map(n => typeof n === 'string' ? { text: n, author: NOTE_AUTHORS.YIGIT, timestamp: Date.now() } : { text: n.text || '', author: n.author || NOTE_AUTHORS.YIGIT, timestamp: n.timestamp || Date.now() });
+          .map((n, idx) => typeof n === 'string' ? { id: String(idx), text: n, author: NOTE_AUTHORS.YIGIT, timestamp: Date.now() } : { id: n.id || String(idx), text: n.text || '', author: n.author || NOTE_AUTHORS.YIGIT, timestamp: n.timestamp || Date.now() });
       } else if (typeof raw === 'object') {
-        notes = Object.values(raw).map(val => {
+        notes = Object.entries(raw).map(([key, val]) => {
           if (typeof val === 'string') {
-            return { text: val, author: NOTE_AUTHORS.YIGIT, timestamp: Date.now() };
+            return { id: key, text: val, author: NOTE_AUTHORS.YIGIT, timestamp: Date.now() };
           }
           return {
+            id: key,
             text: val.text || val.note || '',
             author: val.author || NOTE_AUTHORS.YIGIT,
             timestamp: val.timestamp || Date.now()
@@ -130,4 +131,13 @@ function dbListenLoveNotes(callback) {
 function dbAddLoveNote(noteData) {
   const newRef = db.ref(LOVENOTES_PATH).push();
   return newRef.set(noteData);
+}
+
+/**
+ * Sevgi notunu Firebase'den siler.
+ * @param {string} id - Firebase push key.
+ */
+function dbDeleteLoveNote(id) {
+  if (!id) return;
+  return db.ref(`${LOVENOTES_PATH}/${id}`).remove();
 }

@@ -101,6 +101,9 @@ function formatNoteTimestamp(timestamp) {
   return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+const CONFIRM_DELETE_LOVE_NOTE_MSG = "Bu notu panodan kaldırmak istediğine emin misin sevgilim?";
+const EMPTY_LOVE_NOTES_MSG = "Henüz panoya not eklenmemiş, ilk notu sen bırak! 💌";
+
 function renderLoveNotesBoard(notes) {
   const listEl = document.getElementById('loveNotesList');
   if (!listEl) return;
@@ -110,7 +113,7 @@ function renderLoveNotesBoard(notes) {
   const userCreatedNotes = (notes || []).filter(n => n && n.text && !defaultTexts.includes(n.text));
 
   if (!userCreatedNotes || userCreatedNotes.length === 0) {
-    listEl.innerHTML = `<p class="love-notes-list__empty">Henüz pano notu bulunmuyor! İlk notu sen yaz sevgilim 💕</p>`;
+    listEl.innerHTML = `<p class="love-notes-list__empty">${EMPTY_LOVE_NOTES_MSG}</p>`;
     return;
   }
 
@@ -121,6 +124,7 @@ function renderLoveNotesBoard(notes) {
   sortedNotes.forEach(n => {
     const item = document.createElement('div');
     item.className = 'love-note-item';
+    item.setAttribute('data-id', n.id || '');
 
     const isBengi = n.author === 'Bengi';
     const authorBadgeClass = isBengi ? 'love-note-author-badge--bengi' : 'love-note-author-badge--yigit';
@@ -128,6 +132,7 @@ function renderLoveNotesBoard(notes) {
     const dateText = formatNoteTimestamp(n.timestamp);
 
     item.innerHTML = `
+      <button class="love-note-item__delete-btn" data-id="${n.id || ''}" title="Notu Sil">🗑️</button>
       <p class="love-note-item__text">"${n.text}"</p>
       <div class="love-note-item__footer">
         <span class="love-note-author-badge ${authorBadgeClass}">${authorText}</span>
@@ -136,6 +141,30 @@ function renderLoveNotesBoard(notes) {
     `;
 
     listEl.appendChild(item);
+  });
+
+  // Silme ikonlarına tıklama olaylarını bağla
+  const deleteBtns = listEl.querySelectorAll('.love-note-item__delete-btn');
+  deleteBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.getAttribute('data-id');
+      if (!id) return;
+
+      const isConfirmed = confirm(CONFIRM_DELETE_LOVE_NOTE_MSG);
+      if (!isConfirmed) return;
+
+      const card = btn.closest('.love-note-item');
+      if (card) {
+        card.classList.add('removing');
+      }
+
+      setTimeout(() => {
+        if (typeof dbDeleteLoveNote === 'function') {
+          dbDeleteLoveNote(id);
+        }
+      }, 300);
+    });
   });
 }
 
