@@ -85,12 +85,17 @@ function dbDeletePlan(id) {
   return db.ref(`${PLANS_PATH}/${id}`).remove();
 }
 
+const NOTE_AUTHORS = {
+  BENGI: 'Bengi',
+  YIGIT: 'Yiğit'
+};
+
 /* ---- Sevgi Notları (Love Notes) Yardımcı Fonksiyonlar ---- */
 
 /**
  * Firebase Realtime Database'deki lovenotes verilerini gerçek zamanlı dinler.
- * Veri string dizisi veya obje şeklinde gelse de hepsini düz metin array'ine çevirir.
- * @param {function} callback - String dizisi şeklinde sevgi notları ile çağrılır.
+ * Eski string notlar ve yeni nesne notları { text, author, timestamp } formatına normalize eder.
+ * @param {function} callback - [{ text, author, timestamp }] nesne dizisi ile çağrılır.
  */
 function dbListenLoveNotes(callback) {
   db.ref(LOVENOTES_PATH).on('value', (snapshot) => {
@@ -98,11 +103,31 @@ function dbListenLoveNotes(callback) {
     let notes = [];
     if (raw) {
       if (Array.isArray(raw)) {
-        notes = raw.filter(n => typeof n === 'string' || (n && n.text));
+        notes = raw
+          .filter(n => Boolean(n))
+          .map(n => typeof n === 'string' ? { text: n, author: NOTE_AUTHORS.YIGIT, timestamp: Date.now() } : { text: n.text || '', author: n.author || NOTE_AUTHORS.YIGIT, timestamp: n.timestamp || Date.now() });
       } else if (typeof raw === 'object') {
-        notes = Object.values(raw).map(val => (typeof val === 'string' ? val : val.text || val.note || JSON.stringify(val)));
+        notes = Object.values(raw).map(val => {
+          if (typeof val === 'string') {
+            return { text: val, author: NOTE_AUTHORS.YIGIT, timestamp: Date.now() };
+          }
+          return {
+            text: val.text || val.note || '',
+            author: val.author || NOTE_AUTHORS.YIGIT,
+            timestamp: val.timestamp || Date.now()
+          };
+        });
       }
     }
     callback(notes);
   });
+}
+
+/**
+ * Yeni sevgi notu ekler. Firebase push key otomatik ID olarak kullanılır.
+ * @param {object} noteData - { text, author, timestamp }
+ */
+function dbAddLoveNote(noteData) {
+  const newRef = db.ref(LOVENOTES_PATH).push();
+  return newRef.set(noteData);
 }

@@ -332,6 +332,7 @@
           <div class="surprise__love-note-box" id="loveNoteBox">
             <span class="surprise__love-note-heart">🌸 Günün Notu 🌸</span>
             <p id="surpriseLoveNote" class="surprise__love-note-text">Yükleniyor... 💕</p>
+            <div id="surpriseLoveNoteAuthor" class="love-note-author-badge love-note-author-badge--yigit">— Yiğit 💙</div>
           </div>
 
           <button id="surpriseBtn" class="surprise__button" aria-label="Sürpriz Notu Aç">
@@ -339,6 +340,45 @@
             <span class="surprise__button-icon">💖</span>
             <span class="surprise__button-text">Bana Bas 💕</span>
           </button>
+        </div>
+
+        <!-- Inline Love Note Submitting Card -->
+        <div class="surprise__add-card glass-card">
+          <div class="surprise__add-header">
+            <span class="surprise__add-icon">📝</span>
+            <h3 class="surprise__add-title">Aşk Panosuna Not Bırak 📝</h3>
+          </div>
+          <p class="surprise__add-subtitle">İkimizin ortak panosuna tatlı bir not iliştir sevgilim... 💕</p>
+
+          <form id="inlineAddNoteForm" class="interactive-form">
+            <div class="form-group">
+              <label class="form-label">Notu Kim Yazıyor?</label>
+              <div class="author-chip-group">
+                <label class="author-chip author-chip--bengi">
+                  <input type="radio" name="inlineNoteAuthor" value="Bengi" checked>
+                  <span class="author-chip__custom"></span>
+                  <span class="author-chip__text">Bengi 🌸</span>
+                </label>
+                <label class="author-chip author-chip--yigit">
+                  <input type="radio" name="inlineNoteAuthor" value="Yiğit">
+                  <span class="author-chip__custom"></span>
+                  <span class="author-chip__text">Yiğit 💙</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inlineNoteText">Sevgi Notun 💕</label>
+              <textarea id="inlineNoteText" placeholder="İçinden geçen tatlı bir notu buraya bırak... ✨" rows="3" required></textarea>
+            </div>
+
+            <div class="form-actions-row">
+              <div id="inlineAddNoteSuccess" class="form-toast-badge" style="display: none;">
+                Notun panoya eklendi sevgilim! 💕
+              </div>
+              <button type="submit" class="btn btn--primary btn--submit-note">Notu Gönder 💌</button>
+            </div>
+          </form>
         </div>
       </div>
     </section>
@@ -357,7 +397,7 @@
         <blockquote id="surpriseQuoteText" class="modal__quote">
           "Sen benim bu hayatta karşılaştığım en tatlı mucizesin..."
         </blockquote>
-        <span id="surpriseQuoteSub" class="modal__quote-sub">- Seni Çok Seven Sevgilin</span>
+        <span id="surpriseQuoteSub" class="modal__quote-sub love-note-author-badge love-note-author-badge--yigit">— Yiğit 💙</span>
       </div>
       <div class="modal__footer">
         <button id="anotherQuoteBtn" class="btn btn--primary">Bir Not Daha Oku ✨</button>

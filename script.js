@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   initFloatingHearts();
   initSurpriseButton();
+  initInlineLoveNoteForm();
   initGalleryModal();
   initConfettiEngine();
   // initDateProposal is handled in planner.js
@@ -56,15 +57,15 @@ function initFloatingHearts() {
 
 // Fallback love notes (Firebase'de henüz veri yoksa kullanılan yedek liste)
 const defaultSweetQuotes = [
-  "Seninle geçen her saniye, hayatımın en değerli hediyesi... 💕",
-  "Gözlerinin içindeki o sıcak ışık, benim en güvenli ve huzurlu limanım. ✨",
-  "İyi ki varsın, iyi ki hayatımdasın. Seni her gün daha çok seviyorum! 🌸",
-  "Saatlerce oturup seninle kahve içmeyi ve sohbet etmeyi dünyadaki her şeye tercih ederim. ☕💖",
-  "Birlikte attığımız her kahkaha, hafızamın en tatlı köşesinde saklı... 🥰",
-  "Dünyadaki en güzel ve en özel manzara, senin gülümsediğin andır. ✨",
-  "Seninle kurduğumuz tüm hayaller bir gün tek tek gerçek olacak. 🌟",
-  "Elini tuttuğum ilk andan beri kalbimin tek sahibi sensin. 💕",
-  "Sen benim bu dünyadaki en güzel sürprizimsin! ✨"
+  { text: "Seninle geçen her saniye, hayatımın en değerli hediyesi... 💕", author: 'Yiğit' },
+  { text: "Gözlerinin içindeki o sıcak ışık, benim en güvenli ve huzurlu limanım. ✨", author: 'Yiğit' },
+  { text: "İyi ki varsın, iyi ki hayatımdasın. Seni her gün daha çok seviyorum! 🌸", author: 'Yiğit' },
+  { text: "Saatlerce oturup seninle kahve içmeyi ve sohbet etmeyi dünyadaki her şeye tercih ederim. ☕💖", author: 'Yiğit' },
+  { text: "Birlikte attığımız her kahkaha, hafızamın en tatlı köşesinde saklı... 🥰", author: 'Yiğit' },
+  { text: "Dünyadaki en güzel ve en özel manzara, senin gülümsediğin andır. ✨", author: 'Yiğit' },
+  { text: "Seninle kurduğumuz tüm hayaller bir gün tek tek gerçek olacak. 🌟", author: 'Yiğit' },
+  { text: "Elini tuttuğum ilk andan beri kalbimin tek sahibi sensin. 💕", author: 'Yiğit' },
+  { text: "Sen benim bu dünyadaki en güzel sürprizimsin! ✨", author: 'Yiğit' }
 ];
 
 let activeLoveNotes = [...defaultSweetQuotes];
@@ -81,11 +82,24 @@ function getRandomLoveNote() {
   return currentList[randomIndex];
 }
 
+function renderNoteDisplay(noteObj, textEl, authorEl) {
+  if (!noteObj) return;
+  if (textEl) {
+    textEl.textContent = `"${noteObj.text}"`;
+  }
+  if (authorEl) {
+    const isBengi = noteObj.author === 'Bengi';
+    authorEl.textContent = isBengi ? '— Bengi 🌸' : '— Yiğit 💙';
+    authorEl.className = `love-note-author-badge ${isBengi ? 'love-note-author-badge--bengi' : 'love-note-author-badge--yigit'}`;
+  }
+}
+
 function initSurpriseButton() {
   const surpriseBtn = document.getElementById('surpriseBtn');
   const surpriseModal = document.getElementById('surpriseModal');
   const modalCloseBtn = document.getElementById('modalCloseBtn');
   const surpriseQuoteText = document.getElementById('surpriseQuoteText');
+  const surpriseQuoteSub = document.getElementById('surpriseQuoteSub');
   const anotherQuoteBtn = document.getElementById('anotherQuoteBtn');
   const backdrop = surpriseModal ? surpriseModal.querySelector('.modal__backdrop') : null;
 
@@ -110,16 +124,14 @@ function initSurpriseButton() {
 
   function displayRandomLoveNoteOnLoad() {
     const loveNoteEl = document.getElementById('surpriseLoveNote');
-    if (loveNoteEl) {
-      loveNoteEl.textContent = `"${getRandomLoveNote()}"`;
-    }
+    const loveNoteAuthorEl = document.getElementById('surpriseLoveNoteAuthor');
+    const note = getRandomLoveNote();
+    renderNoteDisplay(note, loveNoteEl, loveNoteAuthorEl);
   }
 
   function showSurprise() {
-    // Firebase veya fallback listesinden rastgele bir not seç
-    if (surpriseQuoteText) {
-      surpriseQuoteText.textContent = `"${getRandomLoveNote()}"`;
-    }
+    const note = getRandomLoveNote();
+    renderNoteDisplay(note, surpriseQuoteText, surpriseQuoteSub);
 
     // Show modal
     surpriseModal.classList.add('active');
@@ -141,9 +153,8 @@ function initSurpriseButton() {
 
   if (anotherQuoteBtn) {
     anotherQuoteBtn.addEventListener('click', () => {
-      if (surpriseQuoteText) {
-        surpriseQuoteText.textContent = `"${getRandomLoveNote()}"`;
-      }
+      const note = getRandomLoveNote();
+      renderNoteDisplay(note, surpriseQuoteText, surpriseQuoteSub);
       triggerConfettiExplosion();
     });
   }
@@ -152,6 +163,54 @@ function initSurpriseButton() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && surpriseModal.classList.contains('active')) {
       hideSurprise();
+    }
+  });
+}
+
+/* --- 2.5 Inline Love Note Submitting System --- */
+function initInlineLoveNoteForm() {
+  const form = document.getElementById('inlineAddNoteForm');
+  const toastMsg = document.getElementById('inlineAddNoteSuccess');
+  if (!form) return;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const noteTextEl = document.getElementById('inlineNoteText');
+    const selectedAuthorEl = form.querySelector('input[name="inlineNoteAuthor"]:checked');
+
+    const text = noteTextEl ? noteTextEl.value.trim() : '';
+    const author = selectedAuthorEl ? selectedAuthorEl.value : 'Bengi';
+
+    if (!text) return;
+
+    const noteData = {
+      text: text,
+      author: author,
+      timestamp: Date.now()
+    };
+
+    if (typeof dbAddLoveNote === 'function') {
+      dbAddLoveNote(noteData);
+    }
+
+    form.reset();
+
+    // Reset sonrası varsayılan Bengi seçimini koru
+    const bengiRadio = form.querySelector('input[name="inlineNoteAuthor"][value="Bengi"]');
+    if (bengiRadio) bengiRadio.checked = true;
+
+    // Konfeti patlat
+    if (typeof triggerConfettiExplosion === 'function') {
+      triggerConfettiExplosion();
+    }
+
+    // Onay rozeti göster
+    if (toastMsg) {
+      toastMsg.style.display = 'inline-flex';
+      setTimeout(() => {
+        toastMsg.style.display = 'none';
+      }, 4000);
     }
   });
 }
