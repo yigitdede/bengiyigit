@@ -105,13 +105,17 @@ function renderLoveNotesBoard(notes) {
   const listEl = document.getElementById('loveNotesList');
   if (!listEl) return;
 
-  if (!notes || notes.length === 0) {
+  // Sadece manuel yazılmış notları al (varsayılan yedek not metinlerini pano listesinden hariç tut)
+  const defaultTexts = defaultSweetQuotes.map(q => q.text);
+  const userCreatedNotes = (notes || []).filter(n => n && n.text && !defaultTexts.includes(n.text));
+
+  if (!userCreatedNotes || userCreatedNotes.length === 0) {
     listEl.innerHTML = `<p class="love-notes-list__empty">Henüz pano notu bulunmuyor! İlk notu sen yaz sevgilim 💕</p>`;
     return;
   }
 
-  // Yeni eklenen notlar en üstte görünecek şekilde sırala
-  const sortedNotes = [...notes].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  // Yeni eklenen notlar en üstte görünecek şekilde sırala (timestamp'e göre)
+  const sortedNotes = [...userCreatedNotes].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
   listEl.innerHTML = '';
   sortedNotes.forEach(n => {
