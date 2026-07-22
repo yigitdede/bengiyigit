@@ -94,6 +94,47 @@ function renderNoteDisplay(noteObj, textEl, authorEl) {
   }
 }
 
+function formatNoteTimestamp(timestamp) {
+  if (!timestamp) return '';
+  const d = new Date(timestamp);
+  if (isNaN(d.getTime())) return '';
+  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function renderLoveNotesBoard(notes) {
+  const listEl = document.getElementById('loveNotesList');
+  if (!listEl) return;
+
+  if (!notes || notes.length === 0) {
+    listEl.innerHTML = `<p class="love-notes-list__empty">Henüz pano notu bulunmuyor! İlk notu sen yaz sevgilim 💕</p>`;
+    return;
+  }
+
+  // Yeni eklenen notlar en üstte görünecek şekilde sırala
+  const sortedNotes = [...notes].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+  listEl.innerHTML = '';
+  sortedNotes.forEach(n => {
+    const item = document.createElement('div');
+    item.className = 'love-note-item';
+
+    const isBengi = n.author === 'Bengi';
+    const authorBadgeClass = isBengi ? 'love-note-author-badge--bengi' : 'love-note-author-badge--yigit';
+    const authorText = isBengi ? '— Bengi 🌸' : '— Yiğit 💙';
+    const dateText = formatNoteTimestamp(n.timestamp);
+
+    item.innerHTML = `
+      <p class="love-note-item__text">"${n.text}"</p>
+      <div class="love-note-item__footer">
+        <span class="love-note-author-badge ${authorBadgeClass}">${authorText}</span>
+        ${dateText ? `<span class="love-note-item__date">${dateText}</span>` : ''}
+      </div>
+    `;
+
+    listEl.appendChild(item);
+  });
+}
+
 function initSurpriseButton() {
   const surpriseBtn = document.getElementById('surpriseBtn');
   const surpriseModal = document.getElementById('surpriseModal');
@@ -105,27 +146,27 @@ function initSurpriseButton() {
 
   if (!surpriseBtn || !surpriseModal) return;
 
-  // Firebase Realtime DB dinleyicisi: lovenotes düğümü değişince otomatik listeyi günceller
+  // Firebase Realtime DB dinleyicisi: lovenotes düğümü değişince otomatik hem kartı hem panoyu günceller
   if (typeof dbListenLoveNotes === 'function') {
     dbListenLoveNotes((firebaseNotes) => {
       if (firebaseNotes && firebaseNotes.length > 0) {
         activeLoveNotes = firebaseNotes;
+        renderLoveNotesBoard(firebaseNotes);
       } else {
         activeLoveNotes = [...defaultSweetQuotes];
+        renderLoveNotesBoard([]);
       }
 
-      // Site her açıldığında veya yenilendiğinde bu koleksiyondan rastgele bir not çekip ekrana bassın
-      if (!window.hasLoadedInitialLoveNote) {
-        window.hasLoadedInitialLoveNote = true;
-        displayRandomLoveNoteOnLoad();
-      }
+      // Her yeni veri geldiğinde günün notu kartını güncelle
+      displayRandomLoveNoteOnLoad();
     });
   }
 
   function displayRandomLoveNoteOnLoad() {
     const loveNoteEl = document.getElementById('surpriseLoveNote');
     const loveNoteAuthorEl = document.getElementById('surpriseLoveNoteAuthor');
-    const note = getRandomLoveNote();
+    // Eğer veritabanında not varsa en son eklenen notu veya rastgele notu göster
+    const note = activeLoveNotes.length > 0 ? activeLoveNotes[activeLoveNotes.length - 1] : getRandomLoveNote();
     renderNoteDisplay(note, loveNoteEl, loveNoteAuthorEl);
   }
 
